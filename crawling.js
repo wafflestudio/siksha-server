@@ -1,6 +1,7 @@
 var jsdom = require('jsdom');
 var request = require('request');
 var iconv = require('iconv-lite');
+var Promise = require('bluebird');
 var express = require('express');
 var app = express();
 
@@ -69,24 +70,6 @@ function setPrice(mark) {
 	return price;
 }
 
-function getOptions(flag) {
-	var options;
-
-	switch (flag) {
-		case 0 :
-			options = jikyoungOptions;
-			break;
-		case 1 :
-			options = junjikyoungOptions;
-			break;
-		case 2 :
-		  options = graduateOptions;
-		  break;
-	}
-
-	return options;
-}
-
 function getTimeTypeFromGraduate(index) {
 	if (index >= 0 && index < 2)
 		return "breakfast";
@@ -96,23 +79,24 @@ function getTimeTypeFromGraduate(index) {
 		return "dinner";
 }
 
-function requestGraduateCrawling(req, res, flag) {
-	var options = getOptions(flag);
+function requestGraduateCrawling(datas) {
+	return new Promise(function(resolve) {
+	var options = graduateOptions;
 	
 	var date = new Date();
 	var week = new Array('일', '월', '화', '수', '목', '금', '토');
 	var today = date.getDay();
 
-	request(getOptions(flag), function(error, response, body) {
+	request(options, function(error, response, body) {
 		if (!error) {
 			var decodedBody = iconv.decode(body, "UTF-8");
-			
+
 			jsdom.env({
 				html : decodedBody,
 				scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 				done : function(err, window) {
 					var jsonArray = [];
-					var key = req.route.path;
+					var key = '/graduate';
 
 					var $ = window.jQuery;
 					var tbody = $('tbody').first().children();
@@ -128,26 +112,29 @@ function requestGraduateCrawling(req, res, flag) {
 						});
 					}
 
-					res.send({ restaurant : routesMap.get(key), menus : jsonArray });
+					datas.push({ restaurant : routesMap.get(key), menus : jsonArray });
+					resolve(datas);
 				}
 			});
-		}
+		}	
 	});
+});
 }
 
-function requestCrawling(req, res, flag) {
-	var options = getOptions(flag);
+function requestJikyoungCrawling(datas) {
+	return new Promise(function(resolve) {
+	var options = jikyoungOptions;
 
 	request(options, function(error, response, body) {
 		if (!error) {
 			var decodedBody = iconv.decode(body, "euc-kr");
-				
+
 			jsdom.env({
 				html : decodedBody,
 				scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 				done : function(err, window) {
 					var restaurantJsons = [];
-					var key = req.route.path;
+					var key = '/jikyoung';
 					var restaurants = routesMap.get(key);
 
 					var $ = window.jQuery;
@@ -158,16 +145,16 @@ function requestCrawling(req, res, flag) {
 
 						var tr = page.find("tr:contains(" + restaurants[index] + ")");
         		var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "");
-          	var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "");
-         	 	var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "");
+         		var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "");
+         		var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "");
 
-          	var breakfasts = breakfastTd.split("/");
-          	var lunches = lunchTd.split("/");
-          	var dinners = dinnerTd.split("/");
+         		var breakfasts = breakfastTd.split("/");
+         		var lunches = lunchTd.split("/");
+         		var dinners = dinnerTd.split("/");
 
-          	for(var i in breakfasts) {
+         		for(var i in breakfasts) {
 							menuJsons.push({
-								time : "breakfast",
+								time : "breakfast",		
 								name : breakfasts[i].substring(1) == "" ? null : breakfasts[i].substring(1),
 								price : breakfasts[i].substring(1) == "" ? 0 : setPrice(breakfasts[i].charAt(0))
 							});
@@ -187,29 +174,100 @@ function requestCrawling(req, res, flag) {
 							});
 						}
 
-						restaurantJsons.push({
+						datas.push({
 							restaurant : restaurants[index],
 							menus : menuJsons
 						});
 					}
 
-					res.send(restaurantJsons);
+					resolve(datas);
 				}
 			});
 		}
 	});
+});
 }
 
-app.get('/jikyoung', function(req, res) {
-	requestCrawling(req, res, 0);
-});
+function requestJunjikyoungCrawling(datas) {
+	return new Promise(function(resolve) {
+	var options = junjikyoungOptions;
 
-app.get('/junjikyoung', function(req, res) {
-	requestCrawling(req, res, 1);
-});
+	request(options, function(error, response, body) {
+		if (!error) {
+			var decodedBody = iconv.decode(body, "euc-kr");
 
-app.get('/graduate', function(req, res) {
-	requestGraduateCrawling(req, res, 2);
+			jsdom.env({
+				html : decodedBody,
+				scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
+				done : function(err, window) {
+					var restaurantJsons = [];
+					var key = '/junjikyoung';
+					var restaurants = routesMap.get(key);
+
+					var $ = window.jQuery;
+					var page = $('table');
+
+					for(var index in restaurants) {
+						var menuJsons = [];
+
+						var tr = page.find("tr:contains(" + restaurants[index] + ")");
+        		var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "");
+         		var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "");
+         		var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "");
+
+         		var breakfasts = breakfastTd.split("/");
+         		var lunches = lunchTd.split("/");
+         		var dinners = dinnerTd.split("/");
+
+         		for(var i in breakfasts) {
+							menuJsons.push({
+								time : "breakfast",		
+								name : breakfasts[i].substring(1) == "" ? null : breakfasts[i].substring(1),
+								price : breakfasts[i].substring(1) == "" ? 0 : setPrice(breakfasts[i].charAt(0))
+							});
+						}
+						for(var i in lunches) {
+							menuJsons.push({
+								time : "lunch",
+								name : lunches[i].substring(1) == "" ? null : lunches[i].substring(1),
+								price : lunches[i].substring(1) == "" ? 0 : setPrice(lunches[i].charAt(0))
+							});
+						}
+						for(var i in dinners) {
+							menuJsons.push({
+								time : "dinner",
+								name : dinners[i].substring(1) == "" ? null : dinners[i].substring(1),
+								price : dinners[i].substring(1) == "" ? 0 : setPrice(dinners[i].charAt(0))
+							});
+						}
+
+						datas.push({
+							restaurant : restaurants[index],
+							menus : menuJsons
+						});
+					}
+
+					resolve(datas);
+				}
+			});
+		}
+	});
+});
+}
+
+function combineCrawlingData(req, res) {
+	var empty_list = [];
+	requestJikyoungCrawling(empty_list).then(function(jikyoung_result) {
+		requestJunjikyoungCrawling(jikyoung_result).then(function(junjikyoung_result) {
+			requestGraduateCrawling(junjikyoung_result).then(function(graduate_result) {
+				res.send(graduate_result)
+			})
+		})
+	});
+}
+
+app.get('/restaurants', function(req, res) {
+	combineCrawlingData(req, res);
 });
 
 app.listen("3000");
