@@ -5,7 +5,6 @@ var express = require('express');
 var app = express();
 
 var restaurantList = require('./restaurant_info.js');
-var restaurants = restaurantList.restaurants;
 var routesMap = restaurantList.routesMap;
 
 var jikyoungOptions = {
@@ -123,14 +122,13 @@ function requestGraduateCrawling(req, res, flag) {
 						var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(today);
 
 						jsonArray.push({
-							restaurant : routesMap.get(key),
 							name : $(td).text().trim() == "" ? null : $(td).text().trim(),
 							price : $(td).text().trim() == "" ? 0 : setPrice($(td).find('li').attr('class')),
 							time : getTimeTypeFromGraduate(i)
 						});
 					}
 
-					res.send(jsonArray);
+					res.send({ restaurant : routesMap.get(key), menus : jsonArray });
 				}
 			});
 		}
@@ -148,102 +146,65 @@ function requestCrawling(req, res, flag) {
 				html : decodedBody,
 				scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 				done : function(err, window) {
-					var jsonArray = [];
+					var restaurantJsons = [];
 					var key = req.route.path;
+					var restaurants = routesMap.get(key);
 
 					var $ = window.jQuery;
 					var page = $('table');
 
-					var tr = page.find("tr:contains(" + routesMap.get(key) + ")");
-        	var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace("/ /gi", "/");
-          var lunchTd = tr.find("td:nth-child(5)").text().trim().replace("/ /gi", "/");
-          var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace("/ /gi", "/");
+					for(var index in restaurants) {
+						var menuJsons = [];
 
-          var breakfasts = breakfastTd.split("/");
-          var lunches = lunchTd.split("/");
-          var dinners = dinnerTd.split("/");
+						var tr = page.find("tr:contains(" + restaurants[index] + ")");
+        		var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "");
+          	var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "");
+         	 	var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "");
 
-          for(var i = 0; i < breakfasts.length; i++) {
-						jsonArray.push({
-							restaurant : routesMap.get(key),
-							time : "breakfast",
-							name : breakfasts[i].substring(1) == "" ? null : breakfasts[i].substring(1),
-							price : breakfasts[i].substring(1) == "" ? 0 : setPrice(breakfasts[i].charAt(0)) 
+          	var breakfasts = breakfastTd.split("/");
+          	var lunches = lunchTd.split("/");
+          	var dinners = dinnerTd.split("/");
+
+          	for(var i in breakfasts) {
+							menuJsons.push({
+								time : "breakfast",
+								name : breakfasts[i].substring(1) == "" ? null : breakfasts[i].substring(1),
+								price : breakfasts[i].substring(1) == "" ? 0 : setPrice(breakfasts[i].charAt(0))
+							});
+						}
+						for(var i in lunches) {
+							menuJsons.push({
+								time : "lunch",
+								name : lunches[i].substring(1) == "" ? null : lunches[i].substring(1),
+								price : lunches[i].substring(1) == "" ? 0 : setPrice(lunches[i].charAt(0))
+							});
+						}
+						for(var i in dinners) {
+							menuJsons.push({
+								time : "dinner",
+								name : dinners[i].substring(1) == "" ? null : dinners[i].substring(1),
+								price : dinners[i].substring(1) == "" ? 0 : setPrice(dinners[i].charAt(0))
+							});
+						}
+
+						restaurantJsons.push({
+							restaurant : restaurants[index],
+							menus : menuJsons
 						});
 					}
-					for(var i = 0; i < lunches.length; i++) {
-						jsonArray.push({
-							restaurant : routesMap.get(key),
-							time : "lunch",
-							name : lunches[i].substring(1) == "" ? null : lunches[i].substring(1),
-							price : lunches[i].substring(1) == "" ? 0 : setPrice(lunches[i].charAt(0))
-						});
-					}
-					for(var i = 0; i < dinners.length; i++) {
-						jsonArray.push({
-							restaurant : routesMap.get(key),
-							time : "dinner",
-							name : dinners[i].substring(1) == "" ? null : dinners[i].substring(1),
-							price : dinners[i].substring(1) == "" ? 0 : setPrice(dinners[i].charAt(0))
-						});
-					}
 
-					res.send(jsonArray);
+					res.send(restaurantJsons);
 				}
 			});
 		}
 	});
 }
 
-app.get('/student-center', function(req, res) {
+app.get('/jikyoung', function(req, res) {
 	requestCrawling(req, res, 0);
 });
 
-app.get('/third-cafe', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/undergraduate', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/jahayeon', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/building-302', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/dongwongwan', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/gamgol', function(req, res) {
-	requestCrawling(req, res, 0);
-});
-
-app.get('/fourth-cafe', function(req, res) {
-	requestCrawling(req, res, 1);
-});
-
-app.get('/dooraemidam', function(req, res) {
-	requestCrawling(req, res, 1);
-});
-
-app.get('/building-302', function(req, res) {
-	requestCrawling(req, res, 1);
-});
-
-app.get('/gongggang', function(req, res) {
-	requestCrawling(req, res, 1);
-});
-
-app.get('/sanga', function(req, res) {
-	requestCrawling(req, res, 1);
-});
-
-app.get('/building-220', function(req, res) {
+app.get('/junjikyoung', function(req, res) {
 	requestCrawling(req, res, 1);
 });
 
