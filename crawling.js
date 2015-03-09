@@ -65,6 +65,9 @@ function setPrice(mark) {
 		case 'ⓗ' :
 			price = 0;
 			break;
+		default :
+			price = -1;
+			break;
 	}
 
 	return price;
@@ -157,34 +160,37 @@ function requestJikyoungCrawling(datas) {
 
          			for(var i in breakfasts) {
 								var menu = breakfasts[i].substring(1);
+								var priceTag = setPrice(breakfasts[i].charAt(0));
 								
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "breakfast",		
 										name : menu,
-										price : setPrice(breakfasts[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
 							for(var i in lunches) {
 								var menu = lunches[i].substring(1);
+								var priceTag = setPrice(lunches[i].charAt(0));
 
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "lunch",
 										name : menu,
-										price : setPrice(lunches[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
 							for(var i in dinners) {
 								var menu = dinners[i].substring(1);
+								var priceTag = setPrice(dinners[i].charAt(0));
 
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "dinner",
 										name : menu,
-										price : setPrice(dinners[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
@@ -236,34 +242,37 @@ function requestJunjikyoungCrawling(datas) {
 
          			for(var i in breakfasts) {
 								var menu = breakfasts[i].substring(1);
+								var priceTag = setPrice(breakfasts[i].charAt(0));
 
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "breakfast",		
 										name : menu,
-										price : setPrice(breakfasts[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
 							for(var i in lunches) {
 								var menu = lunches[i].substring(1);
+								var priceTag = setPrice(lunches[i].charAt(0));
 
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "lunch",
 										name : menu,
-										price : setPrice(lunches[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
 							for(var i in dinners) {
 								var menu = dinners[i].substring(1);
+								var priceTag = setPrice(dinners[i].charAt(0));
 
-								if (menu != "") {
+								if (menu != "" && priceTag != -1) {
 									menuJsons.push({
 										time : "dinner",
 										name : menu,
-										price : setPrice(dinners[i].charAt(0))
+										price : priceTag
 									});
 								}
 							}
