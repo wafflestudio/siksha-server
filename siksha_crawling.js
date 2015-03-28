@@ -2,11 +2,14 @@ var jsdom = require('jsdom');
 var request = require('request');
 var iconv = require('iconv-lite');
 var Promise = require('bluebird');
+var CronJob = require('cron').CronJob;
+var fs = require('fs');
 var express = require('express');
 var app = express();
 
-var restaurantList = require('./restaurant_info.js');
-var routesMap = restaurantList.routesMap;
+var restaurantInfo = require('./restaurant_info.js');
+var classMap = restaurantInfo.classMap;
+var nameMap = restaurantInfo.nameMap;
 
 var jikyoungOptions = {
 	url : 'http://www.snuco.com/html/restaurant/restaurant_menu1.asp',
@@ -37,36 +40,36 @@ function setPrice(mark) {
 
 	switch (mark) {
 		case 'ⓐ' :
-			price = 1700;
+			price = "1700";
 			break;
 		case 'ⓑ' :
 		case 'menu_a' :
-			price = 2000;
+			price = "2000";
 			break;
 		case 'ⓒ' :
 		case 'menu_b' :
-			price = 2500;
+			price = "2500";
 			break;
 		case 'ⓓ' :
 		case 'menu_c' :
-			price = 3000;
+			price = "3000";
 			break;
 		case 'ⓔ' :
 		case 'menu_d' :
-			price = 3500;
+			price = "3500";
 			break;
 		case 'ⓕ' :
 		case 'menu_e' :
-			price = 4000;
+			price = "4000";
 			break;
 		case 'ⓖ' :
-			price = 4500;
+			price = "4500";
 			break;
 		case 'ⓗ' :
-			price = 0;
+			price = "Etc";
 			break;
 		default :
-			price = -1;
+			price = "Error";
 			break;
 	}
 
@@ -99,8 +102,7 @@ function requestGraduateCrawling(datas) {
 					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 					done : function(err, window) {
 						var jsonArray = [];
-						var key = '/graduate';
-
+						
 						var $ = window.jQuery;
 						var tbody = $('tbody').first().children();
 			
@@ -111,14 +113,18 @@ function requestGraduateCrawling(datas) {
 
 							if (menu != "") {
 								jsonArray.push({
+									time : getTimeTypeFromGraduate(i),
 									name : menu,
-									price : setPrice($(td).find('li').attr('class')),
-									time : getTimeTypeFromGraduate(i)
+									price : setPrice($(td).find('li').attr('class'))
 								});
 							}
 						}
 
-						datas.push({ restaurant : routesMap.get(key), menus : jsonArray });
+						datas.push({
+							restaurant : '대학원 기숙사 식당',
+							menus : jsonArray
+						});
+						
 						resolve(datas);
 					}
 				});
@@ -140,8 +146,7 @@ function requestJikyoungCrawling(datas) {
 					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 					done : function(err, window) {
 						var restaurantJsons = [];
-						var key = '/jikyoung';
-						var restaurants = routesMap.get(key);
+						var restaurants = classMap.get('jikyoung');
 
 						var $ = window.jQuery;
 						var page = $('table');
@@ -162,7 +167,7 @@ function requestJikyoungCrawling(datas) {
 								var menu = breakfasts[i].substring(1);
 								var priceTag = setPrice(breakfasts[i].charAt(0));
 								
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "breakfast",		
 										name : menu,
@@ -174,7 +179,7 @@ function requestJikyoungCrawling(datas) {
 								var menu = lunches[i].substring(1);
 								var priceTag = setPrice(lunches[i].charAt(0));
 
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "lunch",
 										name : menu,
@@ -186,7 +191,7 @@ function requestJikyoungCrawling(datas) {
 								var menu = dinners[i].substring(1);
 								var priceTag = setPrice(dinners[i].charAt(0));
 
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "dinner",
 										name : menu,
@@ -196,7 +201,7 @@ function requestJikyoungCrawling(datas) {
 							}
 
 							datas.push({
-								restaurant : restaurants[index],
+								restaurant : nameMap.get(restaurants[index]),
 								menus : menuJsons
 							});
 						}
@@ -222,8 +227,7 @@ function requestJunjikyoungCrawling(datas) {
 					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 					done : function(err, window) {
 						var restaurantJsons = [];
-						var key = '/junjikyoung';
-						var restaurants = routesMap.get(key);
+						var restaurants = classMap.get('junjikyoung');
 
 						var $ = window.jQuery;
 						var page = $('table');
@@ -244,7 +248,7 @@ function requestJunjikyoungCrawling(datas) {
 								var menu = breakfasts[i].substring(1);
 								var priceTag = setPrice(breakfasts[i].charAt(0));
 
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "breakfast",		
 										name : menu,
@@ -256,7 +260,7 @@ function requestJunjikyoungCrawling(datas) {
 								var menu = lunches[i].substring(1);
 								var priceTag = setPrice(lunches[i].charAt(0));
 
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "lunch",
 										name : menu,
@@ -268,7 +272,7 @@ function requestJunjikyoungCrawling(datas) {
 								var menu = dinners[i].substring(1);
 								var priceTag = setPrice(dinners[i].charAt(0));
 
-								if (menu != "" && priceTag != -1) {
+								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
 										time : "dinner",
 										name : menu,
@@ -278,7 +282,7 @@ function requestJunjikyoungCrawling(datas) {
 							}
 
 							datas.push({
-								restaurant : restaurants[index],
+								restaurant : nameMap.get(restaurants[index]),
 								menus : menuJsons
 							});
 						}
@@ -291,7 +295,7 @@ function requestJunjikyoungCrawling(datas) {
 	});
 }
 
-function combineCrawlingData(req, res) {
+function combineCrawlingData(callback) {
 	var result = [];
 		
 	var jikyoung_list = [];
@@ -309,13 +313,42 @@ function combineCrawlingData(req, res) {
 			for(var index in graduate_list) {
 				result.push(graduate_list[index]);
 			}
-			res.send(result);
+			
+			return callback(result);
 		}
 	);
 }
 
+function writeCrawlingData() {
+  combineCrawlingData(function(result) {		
+		fs.writeFile('./restaurants.json', JSON.stringify(result), function(err) {
+			if(err)
+				console.log("Error occurs when writing json!");  
+		});
+	});
+}
+
+var crawlingJob = new CronJob('00 05 00 * * *',
+	function() {
+		writeCrawlingData();
+	}, null, true, 'Asia/Seoul');
+
 app.get('/restaurants', function(req, res) {
-	combineCrawlingData(req, res);
+	var is_alarm = req.query.alarm;
+
+	if (is_alarm == true) {
+		fs.readFile('./restaurants.json', { encoding : 'utf8' }, function(err, data) {
+			if (err)
+		 		console.log("Error occurs when reading json!");
+	  	else
+		  	res.send(data);
+		});
+	}
+	else {
+		combineCrawlingData(function(result) {
+			res.send(result);
+		});
+	}
 });
 
 app.listen("3000");
