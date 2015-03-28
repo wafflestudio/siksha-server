@@ -328,7 +328,7 @@ function writeCrawlingData() {
 	});
 }
 
-var crawlingJob = new CronJob('00 05 00 * * *',
+var crawlingJob = new CronJob('00 02 00 * * *',
 	function() {
 		writeCrawlingData();
 	}, null, true, 'Asia/Seoul');
