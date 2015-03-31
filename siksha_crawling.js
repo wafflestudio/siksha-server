@@ -17,25 +17,6 @@ var headers = {
 	'User-Agent' : 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
 };
 
-var jikyoungOptions = {
-	url : 'http://www.snuco.com/html/restaurant/restaurant_menu1.asp',
-	headers : headers,
-	encoding : "binary"
-};
-
-var junjikyoungOptions = {
-	url : 'http://www.snuco.com/html/restaurant/restaurant_menu2.asp',
-	headers : headers,
-	encoding : "binary"
-};
-
-var graduateOptions = {
-	url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php',
-	headers : headers,
-	encoding : null
-};
-
-
 function setPrice(mark) {
 	var price;
 
@@ -86,13 +67,58 @@ function getTimeTypeFromGraduate(index) {
 		return "dinner";
 }
 
-function requestGraduateCrawling(datas) {
-	return new Promise(function(resolve) {
-		var options = graduateOptions;
+function getDateQuery(year, month, day) {
+	return "?date=" + year + "-" + (("" + month).length == 1 ? "0" + month : month) + "-" + (("" + day).length == 1 ? "0" + day : day);
+}
 
-		var date = new Date();
-		var week = new Array('일', '월', '화', '수', '목', '금', '토');
-		var today = date.getDay();
+function getNextWeekSunday(query, callback) {
+	var options = {
+		url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php?' + query,
+		headers : headers,
+		encoding : null
+	};
+	
+	request(options, function(error, response, body) {
+		if (!error) {
+			var decodedBody = iconv.decode(body, "UTF-8");
+
+			jsdom.env({
+				html : decodedBody,
+				src	: [jquery_file], 
+				done : function(err, window) {
+					var menus = [];
+			
+					var $ = window.jQuery;
+					var tbody = $('tbody').first().children();
+
+					for(var i = 0; i < 7; i++) {
+					  var tr = tbody.get(i);
+						var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(0);
+						var menu = $(td).text().trim();
+
+						if (menu != "") {
+							menus.push({
+								time : getTimeTypeFromGraduate(i),
+								name : menu,
+								price : setPrice($(td).find('li').attr('class'))
+							});
+						}
+					}
+				
+					return callback(menus);
+				}
+			});
+		}
+	});
+}
+
+function requestGraduateCrawling(datas, date) {
+	return new Promise(function(resolve) {
+		var options = {
+			url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php',
+			headers : headers,
+			encoding : null
+		};
 
 		request(options, function(error, response, body) {
 			if (!error) {
@@ -100,33 +126,48 @@ function requestGraduateCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-                    src: [jquery_file], 
+					src	: [jquery_file], 
 					done : function(err, window) {
-						var jsonArray = [];
-
+						var dayIndex = new Date().getDay();
 						var $ = window.jQuery;
-						var tbody = $('tbody').first().children();
 
-						for(var i = 0; i < 7; i++) {
-							var tr = tbody.get(i);
-							var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(today);
-							var menu = $(td).text().trim();
+						if (dayIndex == 6 && date == 'tomorrow') {
+							var query = $('div.go').find('a[class=right]').attr('href').substring(11).trim();
 
-							if (menu != "") {
-								jsonArray.push({
-									time : getTimeTypeFromGraduate(i),
-									name : menu,
-									price : setPrice($(td).find('li').attr('class'))
+							getNextWeekSunday(query, function(result) {
+							  datas.push({
+									restaurant : "대학원 기숙사 식당",
+									menus : result
 								});
-							}
+
+								resolve(datas);
+							});
 						}
+						else {
+							var menus = [];
+							var tbody = $('tbody').first().children();
 
-						datas.push({
-							restaurant : '대학원 기숙사 식당',
-							menus : jsonArray
-						});
+							for(var i = 0; i < 7; i++) {
+								var tr = tbody.get(i);
+								var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(date == 'tomorrow' ? dayIndex + 1 : dayIndex);
+								var menu = $(td).text().trim();
 
-						resolve(datas);
+								if (menu != "") {
+									menus.push({
+										time : getTimeTypeFromGraduate(i),
+										name : menu,
+										price : setPrice($(td).find('li').attr('class'))
+									});
+								}
+							}
+
+							datas.push({
+								restaurant : '대학원 기숙사 식당',
+								menus : menus
+							});
+
+							resolve(datas);
+						}
 					}
 				});
 			}
@@ -134,9 +175,19 @@ function requestGraduateCrawling(datas) {
 	});
 }
 
-function requestJikyoungCrawling(datas) {
+function requestJikyoungCrawling(datas, date) {
 	return new Promise(function(resolve) {
-		var options = jikyoungOptions;
+		var today = new Date();
+		var tomorrow = new Date(today.valueOf() + (24 * 60 * 60 * 1000));
+		var query = date == 'today' ?
+			getDateQuery(today.getFullYear(), today.getMonth() + 1, today.getDate()) :
+			getDateQuery(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
+		
+		var options = {
+			url : 'http://www.snuco.com/html/restaurant/restaurant_menu1.asp' + query,
+			headers : headers,
+			encoding : "binary"
+		};
 
 		request(options, function(error, response, body) {
 			if (!error) {
@@ -144,18 +195,15 @@ function requestJikyoungCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-                    src: [jquery_file], 
+					src	: [jquery_file], 
 					done : function(err, window) {
-						var restaurantJsons = [];
 						var restaurants = classMap.get('jikyoung');
-
 						var $ = window.jQuery;
-						var page = $('table');
 
 						for(var index in restaurants) {
-							var menuJsons = [];
+							var menus = [];
 
-							var tr = page.find("tr:contains(" + restaurants[index] + ")");
+							var tr = $('table').find("tr:contains(" + restaurants[index] + ")");
 							var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
 							var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
 							var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
@@ -169,7 +217,7 @@ function requestJikyoungCrawling(datas) {
 								var priceTag = setPrice(breakfasts[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "breakfast",
 										name : menu,
 										price : priceTag
@@ -181,7 +229,7 @@ function requestJikyoungCrawling(datas) {
 								var priceTag = setPrice(lunches[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "lunch",
 										name : menu,
 										price : priceTag
@@ -193,7 +241,7 @@ function requestJikyoungCrawling(datas) {
 								var priceTag = setPrice(dinners[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "dinner",
 										name : menu,
 										price : priceTag
@@ -203,7 +251,7 @@ function requestJikyoungCrawling(datas) {
 
 							datas.push({
 								restaurant : nameMap.get(restaurants[index]),
-								menus : menuJsons
+								menus : menus
 							});
 						}
 
@@ -215,9 +263,19 @@ function requestJikyoungCrawling(datas) {
 	});
 }
 
-function requestJunjikyoungCrawling(datas) {
+function requestJunjikyoungCrawling(datas, date) {
 	return new Promise(function(resolve) {
-		var options = junjikyoungOptions;
+		var today = new Date();
+		var tomorrow = new Date(today.valueOf() + (24 * 60 * 60 * 1000));
+		var query = date == 'today' ?
+			getDateQuery(today.getFullYear(), today.getMonth() + 1, today.getDate()) :
+			getDateQuery(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());	
+		
+		var options = {
+			url : 'http://www.snuco.com/html/restaurant/restaurant_menu2.asp' + query,
+			headers : headers,
+			encoding : "binary"
+		};
 
 		request(options, function(error, response, body) {
 			if (!error) {
@@ -225,18 +283,15 @@ function requestJunjikyoungCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-                    src: [jquery_file], 
+					src	: [jquery_file], 
 					done : function(err, window) {
-						var restaurantJsons = [];
 						var restaurants = classMap.get('junjikyoung');
-
 						var $ = window.jQuery;
-						var page = $('table');
 
 						for(var index in restaurants) {
-							var menuJsons = [];
+							var menus = [];
 
-							var tr = page.find("tr:contains(" + restaurants[index] + ")");
+							var tr = $('table').find("tr:contains(" + restaurants[index] + ")");
 							var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
 							var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
 							var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
@@ -250,7 +305,7 @@ function requestJunjikyoungCrawling(datas) {
 								var priceTag = setPrice(breakfasts[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "breakfast",
 										name : menu,
 										price : priceTag
@@ -262,7 +317,7 @@ function requestJunjikyoungCrawling(datas) {
 								var priceTag = setPrice(lunches[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "lunch",
 										name : menu,
 										price : priceTag
@@ -274,7 +329,7 @@ function requestJunjikyoungCrawling(datas) {
 								var priceTag = setPrice(dinners[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
-									menuJsons.push({
+									menus.push({
 										time : "dinner",
 										name : menu,
 										price : priceTag
@@ -284,7 +339,7 @@ function requestJunjikyoungCrawling(datas) {
 
 							datas.push({
 								restaurant : nameMap.get(restaurants[index]),
-								menus : menuJsons
+								menus : menus
 							});
 						}
 
@@ -296,24 +351,23 @@ function requestJunjikyoungCrawling(datas) {
 	});
 }
 
-function combineCrawlingData(callback) {
+function combineCrawlingData(date, callback) {
 	var result = [];
 
 	var jikyoung_list = [];
 	var junjikyoung_list = [];
 	var graduate_list = [];
 
-	Promise.all([requestJikyoungCrawling(jikyoung_list), requestJunjikyoungCrawling(junjikyoung_list), requestGraduateCrawling(graduate_list)]).then(
+	Promise.all([requestJikyoungCrawling(jikyoung_list, date), requestJunjikyoungCrawling(junjikyoung_list, date), requestGraduateCrawling(graduate_list, date)]).then(
 		function() {
-			for(var index in jikyoung_list) {
+			for(var index in jikyoung_list)
 				result.push(jikyoung_list[index]);
-			}
-			for(var index in junjikyoung_list) {
+
+			for(var index in junjikyoung_list)
 				result.push(junjikyoung_list[index]);
-			}
-			for(var index in graduate_list) {
+
+			for(var index in graduate_list)
 				result.push(graduate_list[index]);
-			}
 
 			return callback(result);
 		}
@@ -321,10 +375,17 @@ function combineCrawlingData(callback) {
 }
 
 function writeCrawlingData() {
-	combineCrawlingData(function(result) {
-		fs.writeFile('./restaurants.json', JSON.stringify(result), function(err) {
-			if(err)
-				console.log("Error occurs when writing json!");
+	combineCrawlingData('today', function(result) {
+		fs.writeFile('./restaurants_today.json', JSON.stringify(result), function(err) {
+			if (err)
+				console.log("Error occurs when writing today json!");
+		});
+	});
+
+	combineCrawlingData('tomorrow', function(result) {
+		fs.writeFile('./restaurants_tomorrow.json', JSON.stringify(result), function(err) {
+			if (err)
+				console.log("Error occurs when writing tomorrow json!");
 		});
 	});
 }
@@ -335,18 +396,36 @@ var crawlingJob = new CronJob('00 02 00 * * *',
 	}, null, true, 'Asia/Seoul');
 
 app.get('/restaurants', function(req, res) {
-	var is_alarm = req.query.alarm;
+	var alarm_str = req.query.alarm; // will be erased
+	var date_str = req.query.date;
 
-	if (is_alarm == "true") {
-		fs.readFile('./restaurants.json', { encoding : 'utf8' }, function(err, data) {
-			if (err) {
-				console.log("Error occurs when reading json!");
-			} else {
+	if (date_str == "today") {
+		fs.readFile("./restaurants_today.json", { encoding : 'utf8' }, function(err, data) {
+			if (err)
+				console.log("Error occurs when reading today json!");
+			else
 				res.send(data);
-			}
 		});
-	} else {
-		combineCrawlingData(function(result) {
+	}
+	else if (date_str == "tomorrow") {
+		fs.readFile("./restaurants_tomorrow.json", { encoding : 'utf8' }, function(err, data) {
+			if (err)
+				console.log("Error occurs when reading tomorrow json!");
+			else
+				res.send(data);
+		});
+	}
+	else if (alarm_str == "true") {
+		// will be erased
+		fs.readFile("./restaurants_today.json", { encoding : 'utf8' }, function(err, data) {
+			if (err)
+				console.log("Error occurs when reading today json!");
+			else
+				res.send(data);
+		});
+	}
+	else {	
+		combineCrawlingData('today', function(result) {
 			res.send(result);
 		});
 	}

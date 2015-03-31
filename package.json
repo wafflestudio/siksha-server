@@ -2,7 +2,7 @@
   "name": "Siksha-Server",
   "version": "1.0.0",
   "description": "",
-  "main": "crawling.js",
+  "main": "siksha_crawling.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
