@@ -11,29 +11,28 @@ var restaurantInfo = require('./restaurant_info.js');
 var classMap = restaurantInfo.classMap;
 var nameMap = restaurantInfo.nameMap;
 
+var headers = {
+	'User-Agent' : 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
+};
+
 var jikyoungOptions = {
 	url : 'http://www.snuco.com/html/restaurant/restaurant_menu1.asp',
-	headers : { 
-		'User-Agent' : 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
-	},
+	headers : headers,
 	encoding : "binary"
 };
 
 var junjikyoungOptions = {
 	url : 'http://www.snuco.com/html/restaurant/restaurant_menu2.asp',
-	headers : { 
-		'User-Agent' : 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
-	},
+	headers : headers,
 	encoding : "binary"
 };
 
 var graduateOptions = {
 	url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php',
-	headers : { 
-		'User-Agent' : 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
-	},
+	headers : headers,
 	encoding : null
 };
+
 
 function setPrice(mark) {
 	var price;
@@ -88,7 +87,7 @@ function getTimeTypeFromGraduate(index) {
 function requestGraduateCrawling(datas) {
 	return new Promise(function(resolve) {
 		var options = graduateOptions;
-	
+
 		var date = new Date();
 		var week = new Array('일', '월', '화', '수', '목', '금', '토');
 		var today = date.getDay();
@@ -102,10 +101,10 @@ function requestGraduateCrawling(datas) {
 					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
 					done : function(err, window) {
 						var jsonArray = [];
-						
+
 						var $ = window.jQuery;
 						var tbody = $('tbody').first().children();
-			
+
 						for(var i = 0; i < 7; i++) {
 							var tr = tbody.get(i);
 							var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(today);
@@ -124,11 +123,11 @@ function requestGraduateCrawling(datas) {
 							restaurant : '대학원 기숙사 식당',
 							menus : jsonArray
 						});
-						
+
 						resolve(datas);
 					}
 				});
-			}	
+			}
 		});
 	});
 }
@@ -155,21 +154,21 @@ function requestJikyoungCrawling(datas) {
 							var menuJsons = [];
 
 							var tr = page.find("tr:contains(" + restaurants[index] + ")");
-        			var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
-         			var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
-         			var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
+							var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
+							var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
+							var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
 
-         			var breakfasts = breakfastTd.split("/");
-         			var lunches = lunchTd.split("/");
-         			var dinners = dinnerTd.split("/");
+							var breakfasts = breakfastTd.split("/");
+							var lunches = lunchTd.split("/");
+							var dinners = dinnerTd.split("/");
 
-         			for(var i in breakfasts) {
+							for(var i in breakfasts) {
 								var menu = breakfasts[i].substring(1);
 								var priceTag = setPrice(breakfasts[i].charAt(0));
-								
+
 								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
-										time : "breakfast",		
+										time : "breakfast",
 										name : menu,
 										price : priceTag
 									});
@@ -236,21 +235,21 @@ function requestJunjikyoungCrawling(datas) {
 							var menuJsons = [];
 
 							var tr = page.find("tr:contains(" + restaurants[index] + ")");
-        			var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
-         			var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
-         			var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
+							var breakfastTd = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/");
+							var lunchTd = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/");
+							var dinnerTd = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/");
 
-         			var breakfasts = breakfastTd.split("/");
-         			var lunches = lunchTd.split("/");
-         			var dinners = dinnerTd.split("/");
+							var breakfasts = breakfastTd.split("/");
+							var lunches = lunchTd.split("/");
+							var dinners = dinnerTd.split("/");
 
-         			for(var i in breakfasts) {
+							for(var i in breakfasts) {
 								var menu = breakfasts[i].substring(1);
 								var priceTag = setPrice(breakfasts[i].charAt(0));
 
 								if (menu != "" && priceTag != "Error") {
 									menuJsons.push({
-										time : "breakfast",		
+										time : "breakfast",
 										name : menu,
 										price : priceTag
 									});
@@ -297,11 +296,11 @@ function requestJunjikyoungCrawling(datas) {
 
 function combineCrawlingData(callback) {
 	var result = [];
-		
+
 	var jikyoung_list = [];
 	var junjikyoung_list = [];
 	var graduate_list = [];
-	
+
 	Promise.all([requestJikyoungCrawling(jikyoung_list), requestJunjikyoungCrawling(junjikyoung_list), requestGraduateCrawling(graduate_list)]).then(
 		function() {
 			for(var index in jikyoung_list) {
@@ -313,17 +312,17 @@ function combineCrawlingData(callback) {
 			for(var index in graduate_list) {
 				result.push(graduate_list[index]);
 			}
-			
+
 			return callback(result);
 		}
 	);
 }
 
 function writeCrawlingData() {
-  combineCrawlingData(function(result) {		
+	combineCrawlingData(function(result) {
 		fs.writeFile('./restaurants.json', JSON.stringify(result), function(err) {
 			if(err)
-				console.log("Error occurs when writing json!");  
+				console.log("Error occurs when writing json!");
 		});
 	});
 }
@@ -339,10 +338,10 @@ app.get('/restaurants', function(req, res) {
 	if (is_alarm == "true") {
 		fs.readFile('./restaurants.json', { encoding : 'utf8' }, function(err, data) {
 			if (err) {
-		 		console.log("Error occurs when reading json!");
-            } else {
-                res.send(data);
-            }
+				console.log("Error occurs when reading json!");
+			} else {
+				res.send(data);
+			}
 		});
 	} else {
 		combineCrawlingData(function(result) {
