@@ -7,6 +7,8 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
+var jquery_file = fs.readFileSync("./jquery.js", "utf-8");
+
 var restaurantInfo = require('./restaurant_info.js');
 var classMap = restaurantInfo.classMap;
 var nameMap = restaurantInfo.nameMap;
@@ -98,7 +100,7 @@ function requestGraduateCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
+                    src: [jquery_file], 
 					done : function(err, window) {
 						var jsonArray = [];
 
@@ -142,7 +144,7 @@ function requestJikyoungCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
+                    src: [jquery_file], 
 					done : function(err, window) {
 						var restaurantJsons = [];
 						var restaurants = classMap.get('jikyoung');
@@ -223,7 +225,7 @@ function requestJunjikyoungCrawling(datas) {
 
 				jsdom.env({
 					html : decodedBody,
-					scripts : ['http://code.jquery.com/jquery-2.1.3.min.js'],
+                    src: [jquery_file], 
 					done : function(err, window) {
 						var restaurantJsons = [];
 						var restaurants = classMap.get('junjikyoung');
