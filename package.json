@@ -17,12 +17,12 @@
   },
   "homepage": "https://github.com/kanggyu94/Siksha-Server",
   "dependencies": {
-    "bluebird": "^2.9.13",
+    "bluebird": "^2.9.21",
     "cron": "^1.0.9",
     "fs": "0.0.2",
     "iconv-lite": "^0.4.7",
-    "jsdom": "^4.0.2",
-    "request": "^2.53.0",
+    "jsdom": "^4.1.0",
+    "request": "^2.54.0",
     "express": "^4.12.3"
   }
 }
