@@ -336,15 +336,15 @@ var crawlingJob = new CronJob('00 02 00 * * *',
 app.get('/restaurants', function(req, res) {
 	var is_alarm = req.query.alarm;
 
-	if (is_alarm == true) {
+	if (is_alarm == "true") {
 		fs.readFile('./restaurants.json', { encoding : 'utf8' }, function(err, data) {
-			if (err)
+			if (err) {
 		 		console.log("Error occurs when reading json!");
-	  	else
-		  	res.send(data);
+            } else {
+                res.send(data);
+            }
 		});
-	}
-	else {
+	} else {
 		combineCrawlingData(function(result) {
 			res.send(result);
 		});
