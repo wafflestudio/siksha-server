@@ -58,7 +58,7 @@ function setPrice(mark) {
 	return price;
 }
 
-function getTimeTypeFromGraduate(index) {
+function getTimeType(index) {
 	if (index >= 0 && index < 2)
 		return "breakfast";
 	else if (index >= 2 && index < 5)
@@ -71,9 +71,9 @@ function getDateQuery(year, month, day) {
 	return "?date=" + year + "-" + (("" + month).length == 1 ? "0" + month : month) + "-" + (("" + day).length == 1 ? "0" + day : day);
 }
 
-function getNextWeekSunday(query, callback) {
+function getMenuOfNextSunday(query, callback) {
 	var options = {
-		url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php?' + query,
+		url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php' + '?' + query,
 		headers : headers,
 		encoding : null
 	};
@@ -98,7 +98,7 @@ function getNextWeekSunday(query, callback) {
 
 						if (menu != "") {
 							menus.push({
-								time : getTimeTypeFromGraduate(i),
+								time : getTimeType(i),
 								name : menu,
 								price : setPrice($(td).find('li').attr('class'))
 							});
@@ -112,7 +112,7 @@ function getNextWeekSunday(query, callback) {
 	});
 }
 
-function requestGraduateCrawling(datas, date) {
+function graduateCrawling(datas, date) {
 	return new Promise(function(resolve) {
 		var options = {
 			url : 'http://dorm.snu.ac.kr/dk_board/facility/food.php',
@@ -134,7 +134,7 @@ function requestGraduateCrawling(datas, date) {
 						if (dayIndex == 6 && date == 'tomorrow') {
 							var query = $('div.go').find('a[class=right]').attr('href').substring(11).trim();
 
-							getNextWeekSunday(query, function(result) {
+							getMenuOfNextSunday(query, function(result) {
 							  datas.push({
 									restaurant : "대학원 기숙사 식당",
 									menus : result
@@ -154,7 +154,7 @@ function requestGraduateCrawling(datas, date) {
 
 								if (menu != "") {
 									menus.push({
-										time : getTimeTypeFromGraduate(i),
+										time : getTimeType(i),
 										name : menu,
 										price : setPrice($(td).find('li').attr('class'))
 									});
@@ -175,7 +175,7 @@ function requestGraduateCrawling(datas, date) {
 	});
 }
 
-function requestJikyoungCrawling(datas, date) {
+function jikyoungCrawling(datas, date) {
 	return new Promise(function(resolve) {
 		var today = new Date();
 		var tomorrow = new Date(today.valueOf() + (24 * 60 * 60 * 1000));
@@ -263,7 +263,7 @@ function requestJikyoungCrawling(datas, date) {
 	});
 }
 
-function requestJunjikyoungCrawling(datas, date) {
+function junjikyoungCrawling(datas, date) {
 	return new Promise(function(resolve) {
 		var today = new Date();
 		var tomorrow = new Date(today.valueOf() + (24 * 60 * 60 * 1000));
@@ -358,7 +358,7 @@ function combineCrawlingData(date, callback) {
 	var junjikyoung_list = [];
 	var graduate_list = [];
 
-	Promise.all([requestJikyoungCrawling(jikyoung_list, date), requestJunjikyoungCrawling(junjikyoung_list, date), requestGraduateCrawling(graduate_list, date)]).then(
+	Promise.all([jikyoungCrawling(jikyoung_list, date), junjikyoungCrawling(junjikyoung_list, date), graduateCrawling(graduate_list, date)]).then(
 		function() {
 			for(var index in jikyoung_list)
 				result.push(jikyoung_list[index]);
@@ -396,7 +396,6 @@ var crawlingJob = new CronJob('00 02 00 * * *',
 	}, null, true, 'Asia/Seoul');
 
 app.get('/restaurants', function(req, res) {
-	var alarm_str = req.query.alarm; // will be erased
 	var date_str = req.query.date;
 
 	if (date_str == "today") {
@@ -415,15 +414,6 @@ app.get('/restaurants', function(req, res) {
 				res.send(data);
 		});
 	}
-	else if (alarm_str == "true") {
-		// will be erased
-		fs.readFile("./restaurants_today.json", { encoding : 'utf8' }, function(err, data) {
-			if (err)
-				console.log("Error occurs when reading today json!");
-			else
-				res.send(data);
-		});
-	}
 	else {	
 		combineCrawlingData('today', function(result) {
 			res.send(result);
@@ -431,4 +421,4 @@ app.get('/restaurants', function(req, res) {
 	}
 });
 
-app.listen("3000");
+app.listen("3280");
