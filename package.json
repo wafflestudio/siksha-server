@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kanggyu94/Siksha-Server.git"
+    "url": "https://github.com/wafflestudio/Siksha-Server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kanggyu94/Siksha-Server/issues"
+    "url": "https://github.com/wafflestudio/Siksha-Server/issues"
   },
-  "homepage": "https://github.com/kanggyu94/Siksha-Server",
+  "homepage": "https://github.com/wafflestudio/Siksha-Server",
   "dependencies": {
     "bluebird": "^2.9.21",
     "cron": "^1.0.9",
@@ -23,6 +23,7 @@
     "fs": "0.0.2",
     "iconv-lite": "^0.4.7",
     "jsdom": "^4.1.0",
+    "moment": "^2.10.2",
     "pm2": "^0.12.9",
     "request": "^2.54.0"
   }

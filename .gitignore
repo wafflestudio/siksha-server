@@ -28,3 +28,10 @@ node_modules
 
 # Vim
 *.sw*
+
+# spm-agent-nodejs
+spmdb
+spmlogs
+.spmagentrc
+
+.DS_Store
