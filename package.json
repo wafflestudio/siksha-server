@@ -17,14 +17,15 @@
   },
   "homepage": "https://github.com/wafflestudio/Siksha-Server",
   "dependencies": {
-    "bluebird": "^2.9.21",
+    "bluebird": "^2.9.24",
     "cron": "^1.0.9",
     "express": "^4.12.3",
     "fs": "0.0.2",
-    "iconv-lite": "^0.4.7",
+    "iconv-lite": "^0.4.8",
     "jsdom": "^4.1.0",
     "moment": "^2.10.2",
-    "pm2": "^0.12.9",
-    "request": "^2.54.0"
+    "pm2": "^0.12.11",
+    "request": "^2.55.0",
+    "coffee-script": "^1.9.2"
   }
 }
