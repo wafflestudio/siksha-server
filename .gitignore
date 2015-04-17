@@ -32,3 +32,10 @@ node_modules
 # crawling json data
 restaurants_today.json
 restaurants_tomorrow.json
+
+# spm-agent-nodejs
+spmdb
+spmlogs
+.spmagentrc
+
+.DS_Store
