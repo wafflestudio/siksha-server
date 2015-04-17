@@ -28,3 +28,7 @@ node_modules
 
 # Vim
 *.sw*
+
+# crawling json data
+restaurants_today.json
+restaurants_tomorrow.json
