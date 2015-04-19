@@ -213,7 +213,7 @@ writeCrawlingData = ->
 			if err
 				console.log "Error occurs when writing tomorrow json!"
 
-crawlingJob = new cronJob "00 02 00 * * *", writeCrawlingData(), null, false, "Asia/Seoul"
+crawlingJob = new cronJob "00 02 00 * * *", writeCrawlingData(), null, true, "Asia/Seoul"
 
 app.get "/restaurants", (req, res) ->
 	date_str = req.query.date
