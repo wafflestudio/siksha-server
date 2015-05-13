@@ -31,6 +31,38 @@ getTimeType = (index) ->
 	else
 		"dinner"
 
+vetCrawling = (list, flag) ->
+	new promise (resolve) ->
+		options =
+			url : "http://vet.snu.ac.kr/kor/html/bbs/menu/index.jsp"
+			headers : {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"}
+			encoding : null
+
+		request options, (error, response, body) ->
+			if not error
+				jsdom.env
+					html : iconv.decode body, "UTF-8"
+					src : [jqueryFile]
+					done : (err, window) ->
+						$ = window.jQuery
+						menus = []
+
+						todayIndex = new Date().getDay()
+
+						if not (todayIndex is 0 or (todayIndex is 6 and flag is "tomorrow")) 
+							tbody = $("table[bgcolor=dddddd] > tbody")
+							tr = ($ tbody).children().get (if flag is "tomorrow" then todayIndex + 1 else todayIndex)
+							lunchTd = ($ tr).children().get 1
+							dinnerTd = ($ tr).children().get 2
+							lunch = ($ lunchTd).text().trim()
+							dinner = ($ dinnerTd).text().trim()
+							
+							menus.push time : "lunch", name : lunch, price : "Etc" unless lunch is ""
+							menus.push time : "dinner", name : dinner, price : "Etc" unless dinner is ""
+
+						list.push restaurant : "수의대 식당", menus : menus
+						resolve list
+
 getDataOfNextSunday = (query, callback) ->
 	options =
 		url : "http://dorm.snu.ac.kr/dk_board/facility/food.php?#{query}"
@@ -80,10 +112,10 @@ graduateCrawling = (list, flag) ->
 							menus = []
 
 							for i in [0..6]
-								tr = $("tbody:first").children().get i
-								td = $(tr).find("td:not(td[rowspan], td[class=bg])").get (if flag is "tomorrow" then todayIndex + 1 else todayIndex)
-								menu = $(td).text().trim()
-								menus.push time : (getTimeType i), name : menu, price : (setPrice $(td).find("li").attr("class")) unless menu is ""
+								tr = ($ "tbody:first").children().get i
+								td = ($ tr).find("td:not(td[rowspan], td[class=bg])").get (if flag is "tomorrow" then todayIndex + 1 else todayIndex)
+								menu = ($ td).text().trim()
+								menus.push time : (getTimeType i), name : menu, price : (setPrice ($ td).find("li").attr("class")) unless menu is ""
 
 							list.push restaurant : "대학원 기숙사 식당", menus : menus
 							resolve list
@@ -188,16 +220,20 @@ consignmentCrawling = (list, flag) ->
 
 combineCrawlingData = (flag, callback) ->
 	result = []
+	
 	directManagements = []
 	consignments = []
 	graduates = []
+	vets = []
 
-	promise.all([(directManagementCrawling directManagements, flag), (consignmentCrawling consignments, flag), (graduateCrawling graduates, flag)]).then ->
+	promise.all([(directManagementCrawling directManagements, flag), (consignmentCrawling consignments, flag), (graduateCrawling graduates, flag), (vetCrawling vets, flag)]).then ->
 		for restaurant in directManagements
 			result.push restaurant
 		for restaurant in consignments
 			result.push restaurant
 		for restaurant in graduates
+			result.push restaurant
+		for restaurant in vets
 			result.push restaurant
 		
 		callback result
