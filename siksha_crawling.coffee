@@ -60,7 +60,7 @@ vetCrawling = (list, flag) ->
 							menus.push time : "lunch", name : lunch, price : "Etc" unless lunch is ""
 							menus.push time : "dinner", name : dinner, price : "Etc" unless dinner is ""
 
-						list.push restaurant : "수의대 식당", menus : menus
+						list.push restaurant : "85동 수의대 식당", menus : menus
 						resolve list
 
 getDataOfNextSunday = (query, callback) ->

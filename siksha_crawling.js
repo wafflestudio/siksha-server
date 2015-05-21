@@ -105,7 +105,7 @@
                 }
               }
               list.push({
-                restaurant: "수의대 식당",
+                restaurant: "85동 수의대 식당",
                 menus: menus
               });
               return resolve(list);
