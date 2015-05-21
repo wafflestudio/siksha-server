@@ -9,7 +9,7 @@ express = require "express"
 app = express()
 
 jqueryFile = fs.readFileSync "./jquery.js", "utf-8"
-restaurantInfo = require "./restaurant_info.js"
+nameConverter = require "./name_converter.js"
 
 setPrice = (mark) ->
 	switch mark
@@ -136,7 +136,7 @@ directManagementCrawling = (list, flag) ->
 					html : iconv.decode body, "euc-kr"
 					src	: [jqueryFile]
 					done : (err, window) ->
-						restaurants = restaurantInfo.classMap.get "directManagement"
+						restaurants = nameConverter.classMap.get "directManagement"
 						$ = window.jQuery
 
 						for restaurant in restaurants
@@ -165,7 +165,7 @@ directManagementCrawling = (list, flag) ->
 								price = setPrice (dinner.charAt 0)
 								menus.push time : "dinner", name : menu, price : price unless menu is "" or price is "Error"
 
-							list.push restaurant : (restaurantInfo.nameMap.get restaurant), menus : menus
+							list.push restaurant : (nameConverter.nameMap.get restaurant), menus : menus
 
 						resolve list
 
@@ -185,7 +185,7 @@ consignmentCrawling = (list, flag) ->
 					html : iconv.decode body, "euc-kr"
 					src	: [jqueryFile]
 					done : (err, window) ->
-						restaurants = restaurantInfo.classMap.get "consignment"
+						restaurants = nameConverter.classMap.get "consignment"
 						$ = window.jQuery
 
 						for restaurant in restaurants
@@ -214,7 +214,7 @@ consignmentCrawling = (list, flag) ->
 								price = setPrice (dinner.charAt 0)
 								menus.push time : "dinner", name : menu, price : price unless menu is "" or price is "Error"
 
-							list.push restaurant : (restaurantInfo.nameMap.get restaurant), menus : menus
+							list.push restaurant : (nameConverter.nameMap.get restaurant), menus : menus
 						
 						resolve list
 
@@ -250,6 +250,7 @@ writeCrawlingData = ->
 				console.log "Error occurs when writing tomorrow json!"
 
 crawlingJob = new cronJob "00 02 00 * * *", writeCrawlingData, null, true, "Asia/Seoul"
+vetDataUpdatingJob = new cronJob "00 00 10 * * 1", writeCrawlingData, null, true, "Asia/Seoul"
 
 app.get "/restaurants", (req, res) ->
 	date_str = req.query.date
