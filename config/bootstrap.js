@@ -15,7 +15,7 @@ var MenuController = require('../api/controllers/MenuController.js');
 
 module.exports.bootstrap = function(cb) {
   var crawlingJob = new cronJob("00 02 00 * * *", MenuController.save, null, true, "Asia/Seoul");
-  var updatingVetDataJob = new cronJob("00 00 10 * * 1", MenuController.save, null, true, "Asia/Seoul");
+  var updatingVetDataJob = new cronJob("00 55 09 * * 1", MenuController.save, null, true, "Asia/Seoul");
 
   // It's very important to trigger this callback method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)

@@ -137,6 +137,19 @@ function crawlGraduateRestaurant(flag, callback) {
   });
 }
 
+function isPrice(token) {
+  var flag = true;
+
+  for (var i = 0; i < token.length; i++) {
+    if (typeof token.charAt(i) !== "number") {
+      flag = false;
+      break;
+    }
+  }
+
+  return flag;
+}
+
 function crawlSNUCOData(flag, group, callback) {
   return new bluebird(function(resolve) {
     var today = new Date();
@@ -161,30 +174,72 @@ function crawlSNUCOData(flag, group, callback) {
 
               var restaurant = restaurants[i];
               var tr = $("table").find("tr:contains(" + restaurant + ")");
-              var breakfasts = tr.find("td:nth-child(3)").text().trim().replace(/\n| /gi, "/").split("/");
-              var lunches = tr.find("td:nth-child(5)").text().trim().replace(/\n| /gi, "/").split("/");
-              var dinners = tr.find("td:nth-child(7)").text().trim().replace(/\n| /gi, "/").split("/");
+              var breakfasts = tr.find("td:nth-child(3)").text().trim().replace(/\n/g, "/").replace(/\(\*\)/g, "").split("/");
+              var lunches = tr.find("td:nth-child(5)").text().trim().replace(/\n/g, "/").replace(/\(\*\)/g, "").split("/");
+              var dinners = tr.find("td:nth-child(7)").text().trim().replace(/\n/g, "/").replace(/\(\*\)/g, "").split("/");
 
               for (var j = 0; j < breakfasts.length; j++) {
-                var menu = breakfasts[j].substring(1);
-                var price = getPrice(breakfasts[j].charAt(0), "breakfast");
+                var breakfast = breakfasts[j].trim();
                 
-                if (menu !== "" && price !== "Error")
-                  menus.push({ time: "breakfast", name: menu, price: price });
+                if (breakfast !== "") {
+                  var menu = breakfast.substring(1).trim();
+                  var price = getPrice(breakfast.charAt(0), "breakfast");
+
+                  if (price === "Error") {
+                    var token = breakfast.substring(0, 5).trim();
+                    var regex = /[0-9]{4,}/;
+                    
+                    if (regex.test(token)) {
+                      menu = breakfast.substring(5).trim();
+                      price = token;
+                    }
+                  }
+                  
+                  if (price !== "Error")
+                    menus.push({ time: "breakfast", name: menu, price: price });
+                }
               }
               for (var j = 0; j < lunches.length; j++) {
-                var menu = lunches[j].substring(1);
-                var price = getPrice(lunches[j].charAt(0), "lunch");
+                var lunch = lunches[j].trim();
+                
+                if (lunch !== "") {
+                  var menu = lunch.substring(1).trim();
+                  var price = getPrice(lunch.charAt(0), "lunch");
 
-                if (menu !== "" && price !== "Error")
-                  menus.push({ time: "lunch", name: menu, price: price });
+                  if (price === "Error") {
+                    var token = lunch.substring(0, 5).trim();
+                    var regex = /[0-9]{4,}/;
+
+                    if (regex.test(token)) {
+                      menu = lunch.substring(5).trim();
+                      price = token;
+                    }
+                  }
+                  
+                  if (price !== "Error")
+                    menus.push({ time: "lunch", name: menu, price: price });
+                }
               }
               for (var j = 0; j < dinners.length; j++) {
-                var menu = dinners[j].substring(1);
-                var price = getPrice(dinners[j].charAt(0), "dinner");
+                var dinner = dinners[j].trim();
 
-                if (menu !== "" && price !== "Error")
-                  menus.push({ time: "dinner", name: menu, price: price });
+                if (dinner !== "") {
+                  var menu = dinner.substring(1).trim();
+                  var price = getPrice(dinner.charAt(0), "dinner");
+
+                  if (price === "Error") {
+                    var token = dinner.substring(0, 5).trim();
+                    var regex = /[0-9]{4,}/;
+
+                    if (regex.test(token)) {
+                      menu = dinner.substring(5).trim();
+                      price = token;
+                    }
+                  }
+                  
+                  if (price !== "Error")
+                    menus.push({ time: "dinner", name: menu, price: price });
+                }
               }
 
               list.push({ restaurant: NameController.getName(restaurant), menus: menus });
