@@ -137,19 +137,6 @@ function crawlGraduateRestaurant(flag, callback) {
   });
 }
 
-function isPrice(token) {
-  var flag = true;
-
-  for (var i = 0; i < token.length; i++) {
-    if (typeof token.charAt(i) !== "number") {
-      flag = false;
-      break;
-    }
-  }
-
-  return flag;
-}
-
 function crawlSNUCOData(flag, group, callback) {
   return new bluebird(function(resolve) {
     var today = new Date();
@@ -278,8 +265,8 @@ function crawlVetRestaurant(flag, callback) {
               var tr = $(tbody).children().get(flag === "tomorrow" ? todayIndex + 1 : todayIndex);
               var lunchTd = $(tr).children().get(1);
               var dinnerTd = $(tr).children().get(2);
-              var lunch = $(lunchTd).text().replace(/(\s){2,}/gi, " ").replace(/\n/gi, "").trim();
-              var dinner = $(dinnerTd).text().replace(/(\s){2,}/gi, " ").replace(/\n/gi, "").trim();
+              var lunch = $(lunchTd).text().replace(/(\s){2,}/g, " ").replace(/\n/g, "").trim();
+              var dinner = $(dinnerTd).text().replace(/(\s){2,}/g, " ").replace(/\n/g, "").trim();
 
               if (lunch !== "" && lunch !== "휴무")
                 menus.push({ time: "lunch", name: lunch, price: "Etc" });
