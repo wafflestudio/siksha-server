@@ -47,7 +47,7 @@ function updateInformations(req, res) {
 
                         promise.all(saveTasks).then(function(elements) {
                             var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: elements }; 
-                            fs.writeFileSync(__dirname + "/public/javascripts/informations.js", JSON.stringify(result));
+                            fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
                             res.send(result);
                             mongoose.disconnect();
                         }, function(db_error) {
@@ -65,7 +65,7 @@ function updateInformations(req, res) {
 }
 
 function viewInformations(req, res) {
-    fs.readFile(__dirname + "/public/javascripts/informations.js", { encoding: "utf8" }, function(error, data) {
+    fs.readFile(__dirname + "/public/jsons/informations.json", { encoding: "utf8" }, function(error, data) {
         if (!error) {
             res.send(data);
         }
@@ -77,12 +77,18 @@ function viewInformations(req, res) {
             db.once('open', function callback() {
                 Restaurant.find(function(db_error, restaurants) {
                     var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: restaurants };
-                    fs.writeFileSync(__dirname + "/public/javascripts/informations.js", JSON.stringify(result));
+                    fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
                     res.send(result);
                     mongoose.disconnect();
                 });
             });
         }
+    });
+}
+
+function getLatestTime(req, res) {
+    fs.readFile(__dirname + "/public/jsons/informations.json", { encoding: "utf8" }, function(error, data) {
+        res.send({ latest: JSON.parse(data).time });
     });
 }
 
@@ -92,5 +98,8 @@ module.exports = {
     },
     update: function(req, res, next) {
         updateInformations(req, res);
+    },
+    latest: function(req, res, next) {
+        getLatestTime(req, res);
     }
 };

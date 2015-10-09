@@ -313,37 +313,35 @@ function updateCrawlingData(callback) {
             });
 }
 
+function getLatestTime(req, res) {
+    var date = req.query.date;
+    var fileName = date === "today" ? "today.json" : "tomorrow.json";
+
+    fs.readFile(__dirname + "/public/jsons/" + fileName, { encoding: "utf8" }, function(error, data) {
+        res.send({ latest: JSON.parse(data).time });
+    });
+}
+
 module.exports = {
 	crawl: function(req, res, next) {
         var date = req.query.date;
         
-        if (date === "today") {
-            fs.readFile(__dirname + "/public/jsons/today.json", { encoding: "utf8" }, function(error, data) {
-                if (!error) {
-                    res.send(data);
-                }
-                else {
-                    combineCrawlingData("today", function(data) {
-                        res.send(data);
-                    });
-                }
-            });
-        }
-        else if (date === "tomorrow") {
-            fs.readFile(__dirname + "/public/jsons/tomorrow.json", { encoding: "utf8" }, function(error, data) {
-                if (!error) {
-                    res.send(data);
-                }
-                else {
-                    combineCrawlingData("tomorrow", function(data) {
-                        res.send(data);
-                    });
-                }
+        if (!(date === "today" || date === "tomorrow")) {
+            combineCrawlingData("today", function(data) {
+                res.send(data);
             });
         }
         else {
-            combineCrawlingData("today", function(data) {
-                res.send(data);
+            var fileName = date === "today" ? "today.json" : "tomorrow.json";
+            fs.readFile(__dirname + "/public/jsons/" + fileName, { encoding: "utf8" }, function(error, data) {
+                if (!error) {
+                    res.send(data);
+                }
+                else {
+                    combineCrawlingData(date, function(data) {
+                        res.send(data);
+                    });
+                }
             });
         }
     },
@@ -356,5 +354,8 @@ module.exports = {
                 res.render("update", { title: "Failure", message: "An error occurs when updating server JSON!" });
             }
         });
+    },
+    latest: function(req, res, next) {
+        getLatestTime(req, res);
     }
 };
