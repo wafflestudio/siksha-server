@@ -310,15 +310,6 @@ function updateCrawlingData(callback) {
             });
 }
 
-function getLatestTime(req, res) {
-    var date = req.query.date;
-    var fileName = date === "today" ? "today.json" : "tomorrow.json";
-
-    fs.readFile(__dirname + "/public/jsons/" + fileName, { encoding: "utf8" }, function(error, data) {
-        res.send({ latest: JSON.parse(data).time });
-    });
-}
-
 module.exports = {
 	crawl: function(req, res, next) {
         var date = req.query.date;
@@ -351,8 +342,5 @@ module.exports = {
                 res.render("update", { title: "Failure", message: "An error occurs when updating server JSON!" });
             }
         });
-    },
-    latest: function(req, res, next) {
-        getLatestTime(req, res);
     }
 };

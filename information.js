@@ -27,7 +27,7 @@ function updateInformations(req, res) {
                 removeTasks.push(restaurants[i].remove());  
             
             promise.all(removeTasks).then(function() {
-                var data = fs.readFileSync(__dirname + '/public/informations.xml', 'utf-8');                    
+                var data = fs.readFileSync(__dirname + '/public/informations.xml', 'utf8');                    
                 parser.parseString(data, function(parse_error, body) {
                     if (!parse_error) {
                         var informations = body["informations"];
@@ -48,17 +48,17 @@ function updateInformations(req, res) {
                         promise.all(saveTasks).then(function(elements) {
                             var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: elements }; 
                             fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
+                            mongoose.disconnect();
                             res.send(result);
-                            mongoose.disconnect();
                         }, function(db_error) {
-                            res.send(db_error);
                             mongoose.disconnect();
+                            res.send(db_error);
                         });
                     }
                 });         
             }, function(db_error) {
-                res.send(db_error);
                 mongoose.disconnect();
+                res.send(db_error);
             });
         });
     });
@@ -67,7 +67,7 @@ function updateInformations(req, res) {
 function viewInformations(req, res) {
     fs.readFile(__dirname + "/public/jsons/informations.json", { encoding: "utf8" }, function(error, data) {
         if (!error) {
-            res.send(data);
+            res.send(JSON.parse(data));
         }
         else {
             mongoose.connect('mongodb://localhost/restaurant');
@@ -78,8 +78,8 @@ function viewInformations(req, res) {
                 Restaurant.find(function(db_error, restaurants) {
                     var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: restaurants };
                     fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
-                    res.send(result);
                     mongoose.disconnect();
+                    res.send(result);
                 });
             });
         }
