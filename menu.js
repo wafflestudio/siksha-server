@@ -8,8 +8,6 @@ var moment = require('moment');
 
 var name = require('./name.js');
 
-var jquery = fs.readFileSync(__dirname + "/public/javascripts/jquery-2.1.4.min.js", "utf-8");
-
 function getPrice(mark, time) {
     switch (mark) {
         case 'ⓐ':
@@ -73,9 +71,9 @@ function fetchNextSundayData(query, callback) {
                 if (menu !== "") {
                     menus.push({ time: time, name: menu, price: getPrice($(td).find("li").attr("class"), time) });
                 }
-
-                callback(menus);
             }
+
+            callback(menus);
         }
     });
 }
@@ -247,20 +245,19 @@ function crawlVetRestaurant(flag, callback) {
                     if (dinner !== "" && dinner !== "휴무") {
                         menus.push({ time: "dinner", name: dinner, price: "Etc" });
                     }
-
-                    resolve(callback({ restaurant: "85동 수의대 식당", menus: menus }));
                 }
+                
+                resolve(callback({ restaurant: "85동 수의대 식당", menus: menus }));
             }
         });
     });
 }
 
 function combineCrawlingData(flag, callback) {
-  var data = [];
+    var data = [];
+    var graduate, vet, directManagements, consignments;
 
-  var graduate, vet, directManagements, consignments;
-
-  bluebird.all([
+    bluebird.all([
           crawlSNUCOData(flag, "directManagement", function(data) { directManagements = data; }),
           crawlSNUCOData(flag, "consignment", function(data) { consignments = data; }),
           crawlGraduateRestaurant(flag, function(data) { graduate = data; }),
