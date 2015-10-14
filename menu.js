@@ -69,7 +69,8 @@ function fetchNextSundayData(query, callback) {
                 var time = getTimeslot(i);
 
                 if (menu !== "") {
-                    menus.push({ time: time, name: menu, price: getPrice($(td).find("li").attr("class"), time) });
+                    var price = getPrice($(td).find("li").attr("class"), time);
+                    menus.push({ time: time, name: menu, price: (price === "Error" ? "Etc" : price) });
                 }
             }
 
@@ -109,8 +110,10 @@ function crawlGraduateRestaurant(flag, callback) {
                         var menu = $(td).text().trim();
                         var time = getTimeslot(i);
     
-                        if (menu !== "")
-                            menus.push({ time: time, name: menu, price: getPrice($(td).find("li").attr("class"), time) });
+                        if (menu !== "") {
+                            var price = getPrice($(td).find("li").attr("class"), time);
+                            menus.push({ time: time, name: menu, price: (price === "Error" ? "Etc" : price) });
+                        }
                     }
 
                     resolve(callback({ restaurant: "대학원 기숙사 식당", menus: menus }));
