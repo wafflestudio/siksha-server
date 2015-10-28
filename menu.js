@@ -7,6 +7,7 @@ var fs = require('fs');
 var moment = require('moment');
 
 var name = require('./name.js');
+var logger = require('./logger.js');
 
 function getPrice(mark, time) {
     switch (mark) {
@@ -285,7 +286,7 @@ function updateCrawlingData(callback) {
                 combineCrawlingData("today", function(data) {
                     fs.writeFile(__dirname + "/public/jsons/today.json", JSON.stringify(data), function(error) {
                         if (error) {
-                            console.log("Error occurs while writing today contents!");
+                            logger.error("An error occurs while writing today data.");
                             reject();
                         }
                         else {
@@ -298,7 +299,7 @@ function updateCrawlingData(callback) {
                 combineCrawlingData("tomorrow", function(data) {
                     fs.writeFile(__dirname + "/public/jsons/tomorrow.json", JSON.stringify(data), function(error) {
                         if (error) {
-                            console.log("Error occurs while writing tomorrow contents!");
+                            logger.error("An error occurs while writing tomorrow data.");
                             reject();
                         }
                         else {
@@ -314,22 +315,20 @@ function updateCrawlingData(callback) {
 }
 
 module.exports = {
-    crawl: function(callback) {
-        var date = req.query.date;
-        
-        if (!(date === "today" || date === "tomorrow")) {
+    crawl: function(query, callback) {
+        if (!(query === "today" || query === "tomorrow")) {
             combineCrawlingData("today", function(data) {
                 callback(data);
             });
         }
         else {
-            var fileName = date === "today" ? "today.json" : "tomorrow.json";
+            var fileName = query === "today" ? "today.json" : "tomorrow.json";
             fs.readFile(__dirname + "/public/jsons/" + fileName, { encoding: "utf8" }, function(error, data) {
                 if (!error) {
                     callback(data);
                 }
                 else {
-                    combineCrawlingData(date, function(data) {
+                    combineCrawlingData(query, function(data) {
                         callback(data);
                     });
                 }

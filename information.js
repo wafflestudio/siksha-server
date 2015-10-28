@@ -42,16 +42,16 @@ function updateInformations(callback) {
                             var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: elements }; 
                             fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
                             mongoose.disconnect();
-                            callback(result);
+                            callback(true);
                         }, function(db_error) {
                             mongoose.disconnect();
-                            callback(db_error);
+                            callback(false);
                         });
                     }
                 });         
             }, function(db_error) {
                 mongoose.disconnect();
-                callback(db_error);
+                callback(false);
             });
         });
     });
@@ -91,8 +91,8 @@ module.exports = {
         });
     },
     update: function(callback) {
-        updateInformations(function(result) {
-            callback(result);
+        updateInformations(function(success) {
+            callback(success);
         });
     },
     latest: function(callback) {

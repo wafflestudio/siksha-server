@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/menus/view', function(req, res, next) {
-    menu.crawl(function(result) {
+    menu.crawl(req.query.date, function(result) {
         res.send(result);
     });
 });
@@ -19,9 +19,9 @@ router.get('/menus/view', function(req, res, next) {
 router.get('/menus/update', function(req, res, next) {
     menu.update(function(success) {
         if (success)
-            res.render("update", { title: "Success", message: "Server JSON is updated!" });
+            res.render("update", { title: "Success", message: "Server data is updated!" });
         else
-            res.render("update", { title: "Failure", message: "An error occurs when updating server JSON!" });
+            res.render("update", { title: "Failure", message: "An error occurs while updating server data!" });
     });
 });
 
@@ -39,8 +39,11 @@ router.get('/informations/view', function(req, res, next) {
 });
 
 router.get('/informations/update', function(req, res, next) {
-    information.update(function(result) {
-        res.send(result)
+    information.update(function(success) {
+        if (success)
+            res.render("update", { title: "Success", message: "Server data is updated!" });
+        else
+            res.render("update", { title: "Failure", message: "An error occurs while updating server data!" });
     });
 });
 

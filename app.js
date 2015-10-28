@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
+var morgan = require('morgan');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -12,6 +12,7 @@ var app = express();
 
 var menu = require('./menu.js');
 var information = require('./information.js');
+var logger = require('./logger.js'); 
 
 var CronJob = require('cron').CronJob;
 var firstCrawlJob = new CronJob("00 02 00 * * *", menu.update, null, true, "Asia/Seoul");
@@ -25,7 +26,7 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -68,8 +69,19 @@ app.use(function(err, req, res, next) {
 app.disable('etag');
 
 /* Initialize modifiable files */
-menu.update();
-information.update();
+logger.info("Program start!");
+menu.update(function(success) {
+    if (success)
+        logger.info("Initialize menu data successfully.");
+    else
+        logger.error("An error occurs while initializing menu data.");
+});
+information.update(function(success) {
+    if (success)
+        logger.info("Initialize information data successfully.");
+    else
+        logger.error("An error occurs while initializing information data.");
+});
 /* end */
 
 module.exports = app;
