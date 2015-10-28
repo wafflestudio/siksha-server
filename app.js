@@ -11,6 +11,8 @@ var users = require('./routes/users');
 var app = express();
 
 var menu = require('./menu.js');
+var information = require('./information.js');
+
 var CronJob = require('cron').CronJob;
 var firstCrawlJob = new CronJob("00 02 00 * * *", menu.update, null, true, "Asia/Seoul");
 var secondCrawlJob = new CronJob("00 00 07 * * *", menu.update, null, true, "Asia/Seoul");
@@ -64,5 +66,10 @@ app.use(function(err, req, res, next) {
 });
 
 app.disable('etag');
+
+/* Initialize modifiable files */
+menu.update();
+information.update();
+/* end */
 
 module.exports = app;

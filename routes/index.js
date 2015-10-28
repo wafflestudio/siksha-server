@@ -11,28 +11,43 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/menus/view', function(req, res, next) {
-    menu.crawl(req, res);
+    menu.crawl(function(result) {
+        res.send(result);
+    });
 });
 
 router.get('/menus/update', function(req, res, next) {
-    menu.update(req, res);
+    menu.update(function(success) {
+        if (success)
+            res.render("update", { title: "Success", message: "Server JSON is updated!" });
+        else
+            res.render("update", { title: "Failure", message: "An error occurs when updating server JSON!" });
+    });
 });
 
 // For android client
 router.get('/version', function(req, res, next) {
-    version.check(req, res);
+    version.check(function(result) {
+        res.send(result);
+    });
 });
 
 router.get('/informations/view', function(req, res, next) {
-    information.view(req, res);
+    information.view(function(result) {
+        res.send(result);
+    });
 });
 
 router.get('/informations/update', function(req, res, next) {
-    information.update(req, res);
+    information.update(function(result) {
+        res.send(result)
+    });
 });
 
 router.get('/informations/latest', function(req, res, next) {
-    information.latest(req, res);
+    information.latest(function(result) {
+        res.send(result);
+    });
 });
 
 module.exports = router;

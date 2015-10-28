@@ -6,21 +6,14 @@ var moment = require('moment');
 var mongoose = require('mongoose');
 var promise = require('bluebird');
 
-/* Schema */
-var restaurantSchema = mongoose.Schema({
-    name: String,
-    operating_hour: String,
-    location: String
-});
-/* Model */
-var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+var Restaurant = require('./models/restaurant.js').model;
 
-function updateInformations(req, res) {
+function updateInformations(callback) {
     mongoose.connect('mongodb://localhost/restaurant');
     var db = mongoose.connection;
 
     db.on('error', console.error.bind(console, 'connection error:'));
-    db.once('open', function callback() { 
+    db.once('open', function() { 
         Restaurant.find(function(find_error, restaurants) {
             var removeTasks = [];
             for (var i = 0; i < restaurants.length; i++)
@@ -32,14 +25,14 @@ function updateInformations(req, res) {
                     if (!parse_error) {
                         var informations = body["informations"];
                         var names = informations["names"][0]["item"];
-                        var operating_hours = informations["operating_hours"][0]["item"];
+                        var operatingHours = informations["operating_hours"][0]["item"];
                         var locations = informations["locations"][0]["item"];
 
                         var saveTasks = [];
                         for (var i = 0; i < names.length; i++) {
                             var restaurant = new Restaurant({
                                 name: names[i],
-                                operating_hour: operating_hours[i],
+                                operatingHour: operatingHours[i],
                                 location: locations[i]
                             }); 
                             saveTasks.push(restaurant.save());
@@ -49,57 +42,60 @@ function updateInformations(req, res) {
                             var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: elements }; 
                             fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
                             mongoose.disconnect();
-                            res.send(result);
+                            callback(result);
                         }, function(db_error) {
                             mongoose.disconnect();
-                            res.send(db_error);
+                            callback(db_error);
                         });
                     }
                 });         
             }, function(db_error) {
                 mongoose.disconnect();
-                res.send(db_error);
+                callback(db_error);
             });
         });
     });
 }
 
-function viewInformations(req, res) {
+function viewInformations(callback) {
     fs.readFile(__dirname + "/public/jsons/informations.json", { encoding: "utf8" }, function(error, data) {
         if (!error) {
-            res.send(JSON.parse(data));
+            callback(JSON.parse(data));
         }
         else {
             mongoose.connect('mongodb://localhost/restaurant');
             var db = mongoose.connection;
 
             db.on('error', console.error.bind(console, 'connection error:'));
-            db.once('open', function callback() {
+            db.once('open', function() {
                 Restaurant.find(function(db_error, restaurants) {
                     var result = { time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: restaurants };
                     fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
                     mongoose.disconnect();
-                    res.send(result);
+                    callback(result);
                 });
             });
         }
     });
 }
 
-function getLatestTime(req, res) {
-    fs.readFile(__dirname + "/public/jsons/informations.json", { encoding: "utf8" }, function(error, data) {
-        res.send({ latest: JSON.parse(data).time });
-    });
+function getLatestTime() {
+    var data = fs.readFileSync(__dirname + "/public/jsons/informations.json", "utf8");
+    return JSON.parse(data).time;
 }
 
 module.exports = {
-    view: function(req, res, next) {
-        viewInformations(req, res);
+    view: function(callback) {
+        viewInformations(function(result) {
+            callback(result);
+        });
     },
-    update: function(req, res, next) {
-        updateInformations(req, res);
+    update: function(callback) {
+        updateInformations(function(result) {
+            callback(result);
+        });
     },
-    latest: function(req, res, next) {
-        getLatestTime(req, res);
+    latest: function(callback) {
+        callback(getLatestTime());
     }
 };

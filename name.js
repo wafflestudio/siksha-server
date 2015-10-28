@@ -36,7 +36,5 @@ var getName = function(rawName) {
 };
 
 exports.names = names;
-
 exports.getRawNames = getRawNames;
-
 exports.getName = getName;

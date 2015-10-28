@@ -285,7 +285,7 @@ function updateCrawlingData(callback) {
                 combineCrawlingData("today", function(data) {
                     fs.writeFile(__dirname + "/public/jsons/today.json", JSON.stringify(data), function(error) {
                         if (error) {
-                            console.log("Error occurs when writing today contents!");
+                            console.log("Error occurs while writing today contents!");
                             reject();
                         }
                         else {
@@ -298,7 +298,7 @@ function updateCrawlingData(callback) {
                 combineCrawlingData("tomorrow", function(data) {
                     fs.writeFile(__dirname + "/public/jsons/tomorrow.json", JSON.stringify(data), function(error) {
                         if (error) {
-                            console.log("Error occurs when writing tomorrow contents!");
+                            console.log("Error occurs while writing tomorrow contents!");
                             reject();
                         }
                         else {
@@ -314,36 +314,31 @@ function updateCrawlingData(callback) {
 }
 
 module.exports = {
-	crawl: function(req, res, next) {
+    crawl: function(callback) {
         var date = req.query.date;
         
         if (!(date === "today" || date === "tomorrow")) {
             combineCrawlingData("today", function(data) {
-                res.send(data);
+                callback(data);
             });
         }
         else {
             var fileName = date === "today" ? "today.json" : "tomorrow.json";
             fs.readFile(__dirname + "/public/jsons/" + fileName, { encoding: "utf8" }, function(error, data) {
                 if (!error) {
-                    res.send(data);
+                    callback(data);
                 }
                 else {
                     combineCrawlingData(date, function(data) {
-                        res.send(data);
+                        callback(data);
                     });
                 }
             });
         }
     },
-    update: function(req, res, next) {
-        updateCrawlingData(function(isSuccess) {
-            if (isSuccess) {
-                res.render("update", { title: "Success", message: "Server JSON is updated!" });
-            }
-            else {
-                res.render("update", { title: "Failure", message: "An error occurs when updating server JSON!" });
-            }
+    update: function(callback) {
+        updateCrawlingData(function(success) {
+            callback(success);
         });
     }
 };
