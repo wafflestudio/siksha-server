@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var morgan = require('morgan');
-var favicon = require('serve-favicon');
+// var favicon = require('serve-favicon');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -12,13 +12,13 @@ var app = express();
 
 var menu = require('./menu.js');
 var information = require('./information.js');
-var logger = require('./logger.js'); 
+var logger = require('./logger.js');
 
 var CronJob = require('cron').CronJob;
 var firstCrawlJob = new CronJob("00 02 00 * * *", menu.update, null, true, "Asia/Seoul");
 var secondCrawlJob = new CronJob("00 00 07 * * *", menu.update, null, true, "Asia/Seoul");
 var thirdCrawlJob = new CronJob("00 00 16 * * *", menu.update, null, true, "Asia/Seoul");
-var vetDataUpdateJob = new CronJob("00 55 09 * * 1", menu.update, null, true, "Asia/Seoul");
+var vetUpdateJob = new CronJob("00 55 09 * * 1", menu.update, null, true, "Asia/Seoul");
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,7 +28,7 @@ app.set('view engine', 'jade');
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -36,7 +36,7 @@ app.use('/', routes);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
@@ -47,7 +47,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
+    app.use(function (err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
@@ -58,7 +58,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
@@ -70,13 +70,13 @@ app.disable('etag');
 
 /* Initialize modifiable files */
 logger.info("Program start!");
-menu.update(function(success) {
+menu.update(function (success) {
     if (success)
         logger.info("Initialize menu data successfully.");
     else
         logger.error("An error occurs while initializing menu data.");
 });
-information.update(function(success) {
+information.update(function (success) {
     if (success)
         logger.info("Initialize information data successfully.");
     else

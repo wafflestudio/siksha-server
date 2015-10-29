@@ -1,7 +1,7 @@
 var winston = require('winston');
 
 // For log file
-winston.add(winston.transports.File, { filename: 'data.log' });
+winston.add(winston.transports.File, {filename: 'data.log'});
 
 function info(message) {
     winston.log('info', message);
