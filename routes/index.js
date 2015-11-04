@@ -10,13 +10,13 @@ router.get('/', function(req, res, next) {
     res.render('index', { title: 'Express' });
 });
 
-router.get('/menus/view', function(req, res, next) {
+router.get('/menu/view', function(req, res, next) {
     menu.crawl(req.query.date, function(result) {
         res.send(result);
     });
 });
 
-router.get('/menus/update', function(req, res, next) {
+router.get('/menu/update', function(req, res, next) {
     menu.update(function(success) {
         if (success)
             res.render("update", { title: "Success", message: "Server data is updated!" });
@@ -32,13 +32,13 @@ router.get('/version', function(req, res, next) {
     });
 });
 
-router.get('/informations/view', function(req, res, next) {
+router.get('/information/view', function(req, res, next) {
     information.view(function(result) {
         res.send(result);
     });
 });
 
-router.get('/informations/update', function(req, res, next) {
+router.get('/information/update', function(req, res, next) {
     information.update(function(success) {
         if (success)
             res.render("update", { title: "Success", message: "Server data is updated!" });
@@ -47,7 +47,7 @@ router.get('/informations/update', function(req, res, next) {
     });
 });
 
-router.get('/informations/latest', function(req, res, next) {
+router.get('/information/latest', function(req, res, next) {
     information.latest(function(result) {
         res.send(result);
     });

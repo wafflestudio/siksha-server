@@ -8,7 +8,7 @@ var Bluebird = require('bluebird');
 
 var Restaurant = require('./models/restaurant.js').model;
 
-function updateInformations(callback) {
+function updateInformation(callback) {
     mongoose.connect('mongodb://localhost/restaurant');
     var db = mongoose.connection;
 
@@ -20,13 +20,13 @@ function updateInformations(callback) {
                 removeTasks.push(restaurants[i].remove());
 
             Bluebird.all(removeTasks).then(function () {
-                var data = fs.readFileSync(__dirname + '/public/informations.xml', 'utf8');
+                var data = fs.readFileSync(__dirname + '/public/information.xml', 'utf8');
                 parser.parseString(data, function (parse_error, body) {
                     if (!parse_error) {
-                        var informations = body["informations"];
-                        var names = informations["names"][0]["item"];
-                        var operatingHours = informations["operating_hours"][0]["item"];
-                        var locations = informations["locations"][0]["item"];
+                        var information = body["information"];
+                        var names = information["name"][0]["item"];
+                        var operatingHours = information["operating_hour"][0]["item"];
+                        var locations = information["location"][0]["item"];
 
                         var saveTasks = [];
                         for (var i = 0; i < names.length; i++) {
@@ -40,7 +40,7 @@ function updateInformations(callback) {
 
                         Bluebird.all(saveTasks).then(function (elements) {
                             var result = {time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: elements};
-                            fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
+                            fs.writeFileSync(__dirname + "/public/jsons/information.json", JSON.stringify(result));
                             mongoose.disconnect();
                             callback(true);
                         }, function (db_error) {
@@ -57,8 +57,8 @@ function updateInformations(callback) {
     });
 }
 
-function viewInformations(callback) {
-    fs.readFile(__dirname + "/public/jsons/informations.json", {encoding: "utf8"}, function (error, data) {
+function viewInformation(callback) {
+    fs.readFile(__dirname + "/public/jsons/information.json", {encoding: "utf8"}, function (error, data) {
         if (!error) {
             callback(JSON.parse(data));
         }
@@ -70,7 +70,7 @@ function viewInformations(callback) {
             db.once('open', function () {
                 Restaurant.find(function (db_error, restaurants) {
                     var result = {time: moment(new Date()).format("YYYY-MM-DD HH:mm"), data: restaurants};
-                    fs.writeFileSync(__dirname + "/public/jsons/informations.json", JSON.stringify(result));
+                    fs.writeFileSync(__dirname + "/public/jsons/information.json", JSON.stringify(result));
                     mongoose.disconnect();
                     callback(result);
                 });
@@ -80,18 +80,18 @@ function viewInformations(callback) {
 }
 
 function getLatestTime() {
-    var data = fs.readFileSync(__dirname + "/public/jsons/informations.json", "utf8");
+    var data = fs.readFileSync(__dirname + "/public/jsons/information.json", "utf8");
     return {latest: JSON.parse(data).time};
 }
 
 module.exports = {
     view: function (callback) {
-        viewInformations(function (result) {
+        viewInformation(function (result) {
             callback(result);
         });
     },
     update: function (callback) {
-        updateInformations(function (success) {
+        updateInformation(function (success) {
             callback(success);
         });
     },

@@ -33,7 +33,11 @@ function getPrice(mark, time) {
         case 'ⓖ':
             return "4500";
         case 'ⓗ':
-            return "Etc";
+            return "5000";
+        case 'ⓘ':
+            return "5500";
+        case 'ⓙ':
+            return "6000";
         default:
             return "Error";
     }
@@ -60,21 +64,21 @@ function fetchNextSundayMenu(query, callback) {
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(iconv.decode(body, "utf8"));
-            var menus = [];
+            var foods = [];
 
             for (var i = 0; i < 7; i++) {
                 var tr = $("tbody").first().children().get(i);
                 var td = $(tr).find("td:not(td[rowspan], td[class=bg])").get(0);
-                var menu = $(td).text().trim();
+                var food = $(td).text().trim();
                 var time = getTimeSlot(i);
 
-                if (menu !== "") {
+                if (food !== "") {
                     var price = getPrice($(td).find("li").attr("class"), time);
-                    menus.push({time: time, name: menu, price: (price === "Error" ? "Etc" : price)});
+                    foods.push({time: time, name: food, price: (price === "Error" ? "Etc" : price)});
                 }
             }
 
-            callback(menus);
+            callback(foods);
         }
     });
 }
@@ -98,25 +102,25 @@ function crawlGraduateRestaurant(flag, callback) {
                     var query = $("div.go").find("a[class=right]").attr("href").substring(11).trim();
 
                     fetchNextSundayMenu(query, function (data) {
-                        resolve(callback({restaurant: "대학원 기숙사 식당", menus: data}));
+                        resolve(callback({restaurant: "대학원 기숙사 식당", foods: data}));
                     });
                 }
                 else {
-                    var menus = [];
+                    var foods = [];
 
                     for (var i = 0; i <= 6; i++) {
                         var tr = $("tbody").first().children().get(i);
                         var td = $(tr).find("td:not(td[rowspan], td[class=bg])").get(flag === "tomorrow" ? todayIndex + 1 : todayIndex);
-                        var menu = $(td).text().trim();
+                        var food = $(td).text().trim();
                         var time = getTimeSlot(i);
 
-                        if (menu !== "") {
+                        if (food !== "") {
                             var price = getPrice($(td).find("li").attr("class"), time);
-                            menus.push({time: time, name: menu, price: (price === "Error" ? "Etc" : price)});
+                            foods.push({time: time, name: food, price: (price === "Error" ? "Etc" : price)});
                         }
                     }
 
-                    resolve(callback({restaurant: "대학원 기숙사 식당", menus: menus}));
+                    resolve(callback({restaurant: "대학원 기숙사 식당", foods: foods}));
                 }
             }
         });
@@ -140,7 +144,7 @@ function crawlSNUCORestaurants(flag, group, callback) {
                 var list = [];
 
                 for (var i = 0; i < restaurants.length; i++) {
-                    var menus = [];
+                    var foods = [];
                     var restaurant = restaurants[i];
                     var tr = $("table").find("tr:contains(" + restaurant + ")");
                     var breakfasts = tr.find("td:nth-child(3)").text().trim().replace(/\n/g, "/").replace(/\(\*\)/g, "").split("/");
@@ -151,7 +155,7 @@ function crawlSNUCORestaurants(flag, group, callback) {
                         var breakfast = breakfasts[j].trim();
 
                         if (breakfast !== "") {
-                            var menu = breakfast.substring(1).trim();
+                            var food = breakfast.substring(1).trim();
                             var price = getPrice(breakfast.charAt(0), "breakfast");
 
                             if (price === "Error") {
@@ -159,19 +163,19 @@ function crawlSNUCORestaurants(flag, group, callback) {
                                 var regex = /[0-9]{4,}/;
 
                                 if (regex.test(token)) {
-                                    menu = breakfast.substring(5).trim();
+                                    food = breakfast.substring(5).trim();
                                     price = token;
                                 }
                             }
                             if (price !== "Error")
-                                menus.push({time: "breakfast", name: menu, price: price});
+                                foods.push({time: "breakfast", name: food, price: price});
                         }
                     }
                     for (var j = 0; j < lunches.length; j++) {
                         var lunch = lunches[j].trim();
 
                         if (lunch !== "") {
-                            var menu = lunch.substring(1).trim();
+                            var food = lunch.substring(1).trim();
                             var price = getPrice(lunch.charAt(0), "lunch");
 
                             if (price === "Error") {
@@ -179,19 +183,19 @@ function crawlSNUCORestaurants(flag, group, callback) {
                                 var regex = /[0-9]{4,}/;
 
                                 if (regex.test(token)) {
-                                    menu = lunch.substring(5).trim();
+                                    food = lunch.substring(5).trim();
                                     price = token;
                                 }
                             }
                             if (price !== "Error")
-                                menus.push({time: "lunch", name: menu, price: price});
+                                foods.push({time: "lunch", name: food, price: price});
                         }
                     }
                     for (var j = 0; j < dinners.length; j++) {
                         var dinner = dinners[j].trim();
 
                         if (dinner !== "") {
-                            var menu = dinner.substring(1).trim();
+                            var food = dinner.substring(1).trim();
                             var price = getPrice(dinner.charAt(0), "dinner");
 
                             if (price === "Error") {
@@ -199,16 +203,16 @@ function crawlSNUCORestaurants(flag, group, callback) {
                                 var regex = /[0-9]{4,}/;
 
                                 if (regex.test(token)) {
-                                    menu = dinner.substring(5).trim();
+                                    food = dinner.substring(5).trim();
                                     price = token;
                                 }
                             }
                             if (price !== "Error")
-                                menus.push({time: "dinner", name: menu, price: price});
+                                foods.push({time: "dinner", name: food, price: price});
                         }
                     }
 
-                    list.push({restaurant: name.getName(restaurant), menus: menus});
+                    list.push({restaurant: name.getName(restaurant), foods: foods});
                 }
 
                 resolve(callback(list));
@@ -231,7 +235,7 @@ function crawlVetRestaurant(flag, callback) {
             if (!error && response.statusCode == 200) {
                 var $ = cheerio.load(iconv.decode(body, "utf8"));
                 var todayIndex = new Date().getDay();
-                var menus = [];
+                var foods = [];
 
                 if (todayIndex !== 0 && !(todayIndex === 6 && flag === "tomorrow")) {
                     var tbody = $("table[bgcolor=dddddd] > tbody");
@@ -242,15 +246,15 @@ function crawlVetRestaurant(flag, callback) {
                     var dinner = $(dinnerTd).text().replace(/(\s){2,}/g, " ").replace(/\n/g, "").trim();
 
                     if (lunch !== "" && lunch !== "휴무") {
-                        menus.push({time: "lunch", name: lunch, price: "Etc"});
+                        foods.push({time: "lunch", name: lunch, price: "Etc"});
                     }
 
                     if (dinner !== "" && dinner !== "휴무") {
-                        menus.push({time: "dinner", name: dinner, price: "Etc"});
+                        foods.push({time: "dinner", name: dinner, price: "Etc"});
                     }
                 }
 
-                resolve(callback({restaurant: "85동 수의대 식당", menus: menus}));
+                resolve(callback({restaurant: "85동 수의대 식당", foods: foods}));
             }
         });
     });
