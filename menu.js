@@ -238,7 +238,7 @@ function crawlVetRestaurant(flag, callback) {
                 var foods = [];
 
                 if (todayIndex !== 0 && !(todayIndex === 6 && flag === "tomorrow")) {
-                    var tbody = $("table[bgcolor=dddddd] > tbody");
+                    var tbody = $("table[bgcolor=dddddd]");
                     var tr = $(tbody).children().get(flag === "tomorrow" ? todayIndex + 1 : todayIndex);
                     var lunchTd = $(tr).children().get(1);
                     var dinnerTd = $(tr).children().get(2);
