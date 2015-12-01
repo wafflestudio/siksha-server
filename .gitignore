@@ -34,3 +34,4 @@ node_modules
 # Modifiable files (App data)
 today.json
 tomorrow.json
+public/jsons/information.json
