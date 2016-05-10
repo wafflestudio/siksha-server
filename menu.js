@@ -11,7 +11,8 @@ var logger = require('./logger.js');
 function getPrice(mark, time) {
     switch (mark) {
         case 'ⓐ':
-            if (time === "breakfast")
+            if (time === "breakfast" || time === 
+                "dinner")
                 return "1000";
             else
                 return "1700";
