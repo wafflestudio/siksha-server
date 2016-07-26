@@ -224,7 +224,7 @@ function crawlSNUCORestaurants(flag, group, callback) {
 function crawlVetRestaurant(flag, callback) {
     return new Bluebird(function (resolve) {
         var options = {
-            url: "http://vet.snu.ac.kr/kor/html/bbs/menu/index.jsp",
+            url: "http://vet.snu.ac.kr/node/152",
             headers: {
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"
             },
@@ -238,7 +238,7 @@ function crawlVetRestaurant(flag, callback) {
                 var foods = [];
 
                 if (todayIndex !== 0 && !(todayIndex === 6 && flag === "tomorrow")) {
-                    var tbody = $("table[bgcolor=dddddd]");
+                    var tbody = $("table tbody");
                     var tr = $(tbody).children().get(flag === "tomorrow" ? todayIndex + 1 : todayIndex);
                     var lunchTd = $(tr).children().get(1);
                     var dinnerTd = $(tr).children().get(2);
