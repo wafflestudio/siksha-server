@@ -7,7 +7,7 @@ var version = require('../version.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('index', { title: 'Express' });
+    res.render('index', { title: 'Take 1' });
 });
 
 router.get('/menu/view', function(req, res, next) {

@@ -21,6 +21,9 @@ var names = {
     vet: "85동 수의대 식당"
 };
 
+// Used to verify restaurant
+var englishNames = ["StudentHall", "Biology3rd", "Dormitory", "Jahayon", "Engineering302", "Solbat", "Dongwon", "Gamgol", "Education4th", "Duremidam", "Engineering301", "Art", "Engineering", "Sanga", "Wellstroy", "GraduateSchoolDormitory", "Veterinary"] 
+
 var getRawNames = function (group) {
     if (group === "directManagement") {
         return names.rawDirectManagements;
@@ -38,3 +41,4 @@ var getName = function (rawName) {
 exports.names = names;
 exports.getRawNames = getRawNames;
 exports.getName = getName;
+exports.getEngName = englishNames;
