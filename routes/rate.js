@@ -56,7 +56,7 @@ router.get('/today', function (req, res) {
 			});
 		});
 	});
-.);
+});
 
 router.get('/:restaurant', function (req, res) {
 	mongoose.connect('mongodb://localhost/meal');
