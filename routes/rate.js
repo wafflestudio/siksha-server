@@ -50,13 +50,36 @@ router.get('/today', function (req, res) {
 							ratedMenu.push(result[meal]);
 						}
 					}
-					res.send(ratedMenu);
+					res.send(formatMenu(ratedMenu));
 					mongoose.disconnect();
 				}
 			});
 		});
 	});
 });
+
+function formatMenu(menuList) {
+	var formattedList = [];
+	var tmp;
+	for (menu in menuList) {
+		if((tmp = indexRestaurant(menuList[menu].restaurant, formattedList)) < 0) {
+			formattedList.push({"restaurant": menuList[menu].restaurant, "foods": [menuList[menu].name]});
+		} else {
+			formattedList[tmp].foods.push(menuList[menu].name);
+		}
+	}
+	return formattedList;
+}
+
+function indexRestaurant(str, list) {
+	for (i in list) {
+		if (list[i].restaurant === str) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 
 router.get('/:restaurant', function (req, res) {
 	mongoose.connect('mongodb://localhost/meal');
