@@ -30,29 +30,24 @@ router.get('/today', function (req, res) {
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function() {
 		menu.crawl(req.query.date, function(resultString) {
-			console.log('resultString:' + resultString);
 			var result = JSON.parse(resultString);
-			//console.log(result.data);
 			var menuDict = {};
 			var menuNames = [];
 			var ratedMenu = [];
 			for (i in result.data) {
 				var restaurant = result.data[i];
-				//console.log(restaurant.restaurant);
 				for (i in restaurant.foods) {
 					var meal = restaurant.foods[i];
 					menuNames.push(meal.name);
 					menuDict[meal.name] = restaurant.restaurant;
-					//console.log(meal + ": " + menuDict[meal.name]);
 				}
 			}
 			Meal.find({ name: {$in: menuNames} }, function (error, result) {
 				if(error) console.error.bind(console, 'Meal.findOne error:');
 				else { 
 					for (meal in result) {
-						//console.log("meal in Meal.find is type:" + typeof(meal) + "and value is " meal);
-						if(meal.restaurant === menuDict[meal.name]) {
-							ratedMenu.push(meal);
+						if(result[meal].restaurant === menuDict[result[meal].name]) {
+							ratedMenu.push(result[meal]);
 						}
 					}
 					res.send(ratedMenu);
@@ -61,7 +56,7 @@ router.get('/today', function (req, res) {
 			});
 		});
 	});
-});
+.);
 
 router.get('/:restaurant', function (req, res) {
 	mongoose.connect('mongodb://localhost/meal');
@@ -99,18 +94,18 @@ router.get('/:restaurant/:meal', function (req, res) {
 	});
 });
 
-router.post('/:restaurant/:meal', function (req, res) {
+router.post('/', function (req, res) {
 	mongoose.connect('mongodb://localhost/meal');
 	var db = mongoose.connection;
 
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function () {
-		Meal.findOne({ name: req.params.meal, restaurant: req.params.restaurant}, function (err, meal) {
+		Meal.findOne({ name: req.body.meal, restaurant: req.body.restaurant}, function (err, meal) {
 			var rating;
 			if(!meal) {
 				var newMeal = new Meal({
-					name: req.params.meal,
-					restaurant: req.params.restaurant,
+					name: req.body.meal,
+					restaurant: req.body.restaurant,
 					rating: req.body.rating,
 					numberOfRatings: '1'
 				});
