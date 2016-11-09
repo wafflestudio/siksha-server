@@ -39,14 +39,18 @@ router.get('/view', function (req, res) {
 				for(var j in restaurant.foods) {
 					var meal = restaurant.foods[j];
 					menuNames.push(meal.name);
-					menuDict[meal.name] = restaurant.restaurant;
+					if(meal.name in menuDict) {
+						menuDict[meal.name].push(restaurant.restaurant);
+					} else {
+						menuDict[meal.name] = [restaurant.restaurant];
+					}
 				}
 			}
 			Meal.find({ name: {$in: menuNames} }, function (error,doc) {
 				if(error) console.error.bind(console, 'Meal.findOne error:');
 				else { 
 					for(var k in doc) {
-						if(doc[k].restaurant === menuDict[doc[k].name]) {
+						if(menuDict[doc[k].name].contains(doc[k].restaurant)) {
 							ratedMenu.push(doc[k]);
 						}
 					}
@@ -67,6 +71,16 @@ router.get('/view', function (req, res) {
 		});
 	});
 });
+
+Array.prototype.contains = function(obj) {
+	var i = this.length;
+	while (i--) {
+		if (this[i] == obj) {
+			return true;
+		}
+	}
+	return false;
+}
 
 function indexRestaurant(str, list) {
 	for (var i in list) {
