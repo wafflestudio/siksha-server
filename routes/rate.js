@@ -25,7 +25,7 @@ router.get('/all', function (req, res) {
 	});
 });
 
-router.get('/today', function (req, res) {
+router.get('/view', function (req, res) {
 	db = mongoose.connect('mongodb://localhost/meal').connection;
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function() {
@@ -34,23 +34,36 @@ router.get('/today', function (req, res) {
 			var menuDict = {};
 			var menuNames = [];
 			var ratedMenu = [];
-			for (i in result.data) {
+			for(var i in result.data) {
 				var restaurant = result.data[i];
-				for (i in restaurant.foods) {
-					var meal = restaurant.foods[i];
+				for(var j in restaurant.foods) {
+					var meal = restaurant.foods[j];
 					menuNames.push(meal.name);
 					menuDict[meal.name] = restaurant.restaurant;
 				}
 			}
-			Meal.find({ name: {$in: menuNames} }, function (error, result) {
+			Meal.find({ name: {$in: menuNames} }, function (error,doc) {
 				if(error) console.error.bind(console, 'Meal.findOne error:');
 				else { 
-					for (meal in result) {
-						if(result[meal].restaurant === menuDict[result[meal].name]) {
-							ratedMenu.push(result[meal]);
+					for(var k in doc) {
+						if(doc[k].restaurant === menuDict[doc[k].name]) {
+							ratedMenu.push(doc[k]);
 						}
 					}
-					res.send(formatMenu(ratedMenu));
+					for(var l in ratedMenu) {
+						var ratedMeal = ratedMenu[l];
+						if(indexRestaurant(ratedMeal.restaurant, result.data) > -1) {
+							var foodArray = result.data[indexRestaurant(ratedMeal.restaurant, result.data)].foods;
+							console.log("indexRestaurant(ratedMeal.restaurant, result.data):"+indexRestaurant(ratedMeal.restaurant, result.data));
+							console.log("foodArray[0]: " + foodArray[0]);
+							if(indexFood(ratedMeal.name, foodArray) > -1) {
+								var unratedMeal = foodArray[indexFood(ratedMeal.name, foodArray)];
+								console.log(unratedMeal);
+								unratedMeal["rating"] = ratedMenu[l].rating;
+							}
+						}
+					}
+					res.send(result);
 					mongoose.disconnect();
 				}
 			});
@@ -58,21 +71,9 @@ router.get('/today', function (req, res) {
 	});
 });
 
-function formatMenu(menuList) {
-	var formattedList = [];
-	var tmp;
-	for (menu in menuList) {
-		if((tmp = indexRestaurant(menuList[menu].restaurant, formattedList)) < 0) {
-			formattedList.push({"restaurant": menuList[menu].restaurant, "foods": [menuList[menu].name]});
-		} else {
-			formattedList[tmp].foods.push(menuList[menu].name);
-		}
-	}
-	return formattedList;
-}
-
 function indexRestaurant(str, list) {
-	for (i in list) {
+	for (var i in list) {
+		console.log("restaurant: " + list[i].restaurant);
 		if (list[i].restaurant === str) {
 			return i;
 		}
@@ -80,6 +81,14 @@ function indexRestaurant(str, list) {
 	return -1;
 }
 
+function indexFood(str, list) {
+	for (var i in list) {
+		if(list[i].name === str) {
+			return i;
+		}
+	}
+	return -1;
+}
 
 router.get('/:restaurant', function (req, res) {
 	mongoose.connect('mongodb://localhost/meal');
