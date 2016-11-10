@@ -56,11 +56,13 @@ router.get('/view', function (req, res) {
 					}
 					for(var l in ratedMenu) {
 						var ratedMeal = ratedMenu[l];
-						if(indexRestaurant(ratedMeal.restaurant, result.data) > -1) {
-							var foodArray = result.data[indexRestaurant(ratedMeal.restaurant, result.data)].foods;
-							if(indexFood(ratedMeal.name, foodArray) > -1) {
-								var unratedMeal = foodArray[indexFood(ratedMeal.name, foodArray)];
-								unratedMeal["rating"] = ratedMenu[l].rating;
+						if(result.data.indexOfRestaurant(ratedMeal.restaurant) > -1) {
+							var foodArray = result.data[result.data.indexOfRestaurant(ratedMeal.restaurant)].foods;
+							var unratedMealList = foodArray.sublistOfFoodNamed(ratedMeal.name);
+							for(var m in unratedMealList) {
+								console.log("unratedMealList[m] = " + unratedMealList[m].name +"//type:" + typeof(unratedMealList[m]));
+								var unratedMeal = unratedMealList[m];
+								unratedMeal["rating"] = ratedMeal.rating;
 							}
 						}
 					}
@@ -80,6 +82,26 @@ Array.prototype.contains = function(obj) {
 		}
 	}
 	return false;
+}
+
+Array.prototype.indexOfRestaurant = function(restaurantName) {
+	for (var i in this) {
+		if (this[i].restaurant === restaurantName) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+Array.prototype.sublistOfFoodNamed = function(foodName) {
+	var foodList = [];
+	for (var i in this) {
+		if (this[i].name === foodName) {
+			foodList.push(this[i]);
+			console.log("this[i] = " + this[i].name + this[i].time);
+		}
+	}
+	return foodList;
 }
 
 function indexRestaurant(str, list) {
