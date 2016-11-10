@@ -60,7 +60,6 @@ router.get('/view', function (req, res) {
 							var foodArray = result.data[result.data.indexOfRestaurant(ratedMeal.restaurant)].foods;
 							var unratedMealList = foodArray.sublistOfFoodNamed(ratedMeal.name);
 							for(var m in unratedMealList) {
-								console.log("unratedMealList[m] = " + unratedMealList[m].name +"//type:" + typeof(unratedMealList[m]));
 								var unratedMeal = unratedMealList[m];
 								unratedMeal["rating"] = ratedMeal.rating;
 							}
@@ -98,28 +97,9 @@ Array.prototype.sublistOfFoodNamed = function(foodName) {
 	for (var i in this) {
 		if (this[i].name === foodName) {
 			foodList.push(this[i]);
-			console.log("this[i] = " + this[i].name + this[i].time);
 		}
 	}
 	return foodList;
-}
-
-function indexRestaurant(str, list) {
-	for (var i in list) {
-		if (list[i].restaurant === str) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-function indexFood(str, list) {
-	for (var i in list) {
-		if(list[i].name === str) {
-			return i;
-		}
-	}
-	return -1;
 }
 
 router.get('/:restaurant', function (req, res) {
