@@ -62,6 +62,7 @@ router.get('/view', function (req, res) {
 							for(var m in unratedMealList) {
 								var unratedMeal = unratedMealList[m];
 								unratedMeal["rating"] = ratedMeal.rating;
+								unratedMeal["numberOfRatings"] = ratedMeal.numberOfRatings;
 							}
 						}
 					}
