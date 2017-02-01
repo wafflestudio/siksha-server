@@ -11,11 +11,11 @@ var Meal = require('../models/meal')
 var menu = require('../menu')
 
 router.get('/all', function (req, res, next) {
-  Meal.find(function (error, mealList) {
+  Meal.find(function (error, meals) {
     if (error) {
       return next(error)
     } else {
-      return res.send(mealList)
+      return res.send(meals)
     }
   })
 })
@@ -39,17 +39,20 @@ router.get('/view', function (req, res, next) {
         })
       }
     }
-    for (var k in menus) {
-      Meal.findOne({ name: menus[k].meal.name, restaurant: menus[k].restaurant }, function (error, meal) {
-        if (error) {
-          return next(error)
-        } else if (meal) {
-          menus[k].meal.rating = meal.rating
-          menus[k].meal.numberOfRatings = meal.numberOfRatings
+    Meal.find(function (error, meals) {
+      if (error) {
+        return next(error)
+      }
+      for (var i in meals) {
+        for (var j in menus) {
+          if (meals[i].name === menus[j].meal.name && meals[i].restaurant === menus[j].restaurant) {
+            menus[j].meal.rating = meals[i].rating
+            menus[j].meal.numberOfRatings = meals[i].numberOfRatings
+          }
         }
-      })
-    }
-    return res.send(result)
+      }
+      return res.send(result)
+    })
   })
 })
 
@@ -58,7 +61,7 @@ router.get('/restaurant/:restaurant', function (req, res, next) {
     if (error) {
       return next(error)
     } else {
-      res.send(meals)
+      return res.send(meals)
     }
   })
 })

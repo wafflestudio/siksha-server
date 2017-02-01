@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
 
 // mongodb connection
 var dbUri = 'mongodb://localhost/restaurant'
-var db = mongoose.connect(dbUri).connection
+var db = mongoose.createConnection(dbUri)
 db.on('error', console.error.bind(console, 'connection error:'))
 /* Schema */
 var schema = new mongoose.Schema({
