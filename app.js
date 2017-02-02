@@ -10,6 +10,7 @@ var CronJob = require('cron').CronJob
 var routes = require('./routes/index')
 var users = require('./routes/users')
 var rate = require('./routes/rate')
+var stats = require('./routes/stats')
 
 var app = express()
 
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/', routes)
 app.use('/users', users)
 app.use('/rate', rate)
+app.use('/stats', stats)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
