@@ -57,8 +57,8 @@ router.get('/view', function (req, res, next) {
 })
 
 router.get('/restaurant/:restaurant', function (req, res, next) {
-  var decodedRestaurant1 = unescape(req.params.restaurant)
-  Meal.find({ restaurant: decodedRestaurant1 }, function (error, meals) {
+  var restaurant = unescape(req.params.restaurant)
+  Meal.find({ restaurant: restaurant }, function (error, meals) {
     if (error) {
       return next(error)
     } else {
@@ -68,9 +68,9 @@ router.get('/restaurant/:restaurant', function (req, res, next) {
 })
 
 router.get('/restaurant/:restaurant/meal/:meal', function (req, res, next) {
-  var decodedRestaurant2 = unescape(req.params.restaurant)
-  var decodedMeal = unescape(req.params.meal)
-  Meal.findOne({ name: decodedMeal, restaurant: decodedRestaurant2 }, function (error, meal) {
+  var restaurant = unescape(req.params.restaurant)
+  var meal = unescape(req.params.meal)
+  Meal.findOne({ name: meal, restaurant: restaurant }, function (error, meal) {
     if (error) {
       return next(error)
     } else {
