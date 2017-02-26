@@ -1,12 +1,23 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
+
+// mongodb connection
+var dbUri = 'mongodb://localhost/meal'
+var db = mongoose.createConnection(dbUri)
+db.on('error', console.error.bind(console, 'connection error:'))
 
 /* Schema */
-var schema = new mongoose.Schema({
-	name:            String,
-	restaurant:      String,
-	rating:          { type: Number, default: 0 },
-	numberOfRatings: { type: Number, default: 0 }
-});
-var model = mongoose.model('Meal', schema);
+var mealSchema = new mongoose.Schema({
+  name: String,
+  restaurant: String,
+  rating: {
+    type: Number,
+    default: 0
+  },
+  numberOfRatings: {
+    type: Number,
+    default: 0
+  }
+})
+var Meal = db.model('Meal', mealSchema)
 
-exports.model = model;
+module.exports = Meal
