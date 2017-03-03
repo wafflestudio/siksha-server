@@ -150,69 +150,33 @@ function crawlSNUCORestaurants (flag, group, callback) {
           var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
           var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
           var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
+          var mealsObjects = [{ meals: breakfasts, type: 'breakfast' }, { meals: lunches, type: 'lunch' }, { meals: dinners, type: 'dinner' }]
 
-          for (var j = 0; j < breakfasts.length; j++) {
-            var breakfast = breakfasts[j].trim()
+          mealsObjects.forEach(function(mealsObject) {
+            var meals = mealsObject.meals
+            var mealType = mealsObject.type
+            for (var j = 0; j < meals.length; j++) {
+              var meal = meals[j].trim()
 
-            if (breakfast !== '') {
-              var food = breakfast.substring(1).trim()
-              var price = getPrice(breakfast.charAt(0), 'breakfast')
+              if (meal !== '') {
+                var food = meal.substring(1).trim()
+                var price = getPrice(meal.charAt(0), mealType)
 
-              if (price === 'Error') {
-                var token = breakfast.substring(0, 5).trim()
-                var regex = /[0-9]{4,}/
+                if (price === 'Error') {
+                  var token = meal.substring(0, 5).trim()
+                  var regex = /[0-9]{4,}/
 
-                if (regex.test(token)) {
-                  food = breakfast.substring(5).trim()
-                  price = token
+                  if (regex.test(token)) {
+                    food = meal.substring(5).trim()
+                    price = token
+                  }
+                }
+                if (price !== 'Error') {
+                  foods.push({ time: mealType, name: food, price: price })
                 }
               }
-              if (price !== 'Error') {
-                foods.push({ time: 'breakfast', name: food, price: price })
-              }
             }
-          }
-          for (var j = 0; j < lunches.length; j++) {
-            var lunch = lunches[j].trim()
-            if (lunch !== '') {
-              var food = lunch.substring(1).trim()
-              var price = getPrice(lunch.charAt(0), 'lunch')
-
-              if (price === 'Error') {
-                var token = lunch.substring(0, 5).trim()
-                var regex = /[0-9]{4,}/
-
-                if (regex.test(token)) {
-                  food = lunch.substring(5).trim()
-                  price = token
-                }
-              }
-              if (price !== 'Error') {
-                foods.push({ time: 'lunch', name: food, price: price })
-              }
-            }
-          }
-          for (var j = 0; j < dinners.length; j++) {
-            var dinner = dinners[j].trim()
-
-            if (dinner !== '') {
-              var food = dinner.substring(1).trim()
-              var price = getPrice(dinner.charAt(0), 'dinner')
-
-              if (price === 'Error') {
-                var token = dinner.substring(0, 5).trim()
-                var regex = /[0-9]{4,}/
-
-                if (regex.test(token)) {
-                  food = dinner.substring(5).trim()
-                  price = token
-                }
-              }
-              if (price !== 'Error') {
-                foods.push({ time: 'dinner', name: food, price: price })
-              }
-            }
-          }
+          })
           list.push({ restaurant: name.getName(restaurant), foods: foods })
         }
         resolve(callback(list))
