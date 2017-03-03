@@ -158,7 +158,7 @@ function crawlSNUCORestaurants (flag, group, callback) {
                 var price = getPrice(meal.charAt(0), mealType)
                 if (price === 'Error') {
                   var token = meal.match(/\d+/g)[0]
-                  var regex = /[0-9]+/
+                  var regex = /[0-9]{3,}/
                   if (regex.test(token)) {
                     food = meal.replace(token, '').replace(/ /g, '')
                     if (!(/\(/.test(food)) && (/\)/.test(food))) {
