@@ -11,36 +11,36 @@ var logger = require('./logger.js')
 function getPrice (mark, time) {
   switch (mark) {
     case 'ⓐ':
-      if (time === 'breakfast' || time === 'dinner') {
-        return '1000'
-      } else {
-        return '1700'
-      }
+    if (time === 'breakfast' || time === 'dinner') {
+      return '1000'
+    } else {
+      return '1700'
+    }
     case 'ⓑ':
     case 'menu_a':
-      return '2000'
+    return '2000'
     case 'ⓒ':
     case 'menu_b':
-      return '2500'
+    return '2500'
     case 'ⓓ':
     case 'menu_c':
-      return '3000'
+    return '3000'
     case 'ⓔ':
     case 'menu_d':
-      return '3500'
+    return '3500'
     case 'ⓕ':
     case 'menu_e':
-      return '4000'
+    return '4000'
     case 'ⓖ':
-      return '4500'
+    return '4500'
     case 'ⓗ':
-      return '5000'
+    return '5000'
     case 'ⓘ':
-      return '5500'
+    return '5500'
     case 'ⓙ':
-      return '6000'
+    return '6000'
     default:
-      return 'Error'
+    return 'Error'
   }
 }
 
@@ -150,69 +150,33 @@ function crawlSNUCORestaurants (flag, group, callback) {
           var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
           var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
           var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
+          var mealsObjects = [{ meals: breakfasts, type: 'breakfast' }, { meals: lunches, type: 'lunch' }, { meals: dinners, type: 'dinner' }]
 
-          for (var j = 0; j < breakfasts.length; j++) {
-            var breakfast = breakfasts[j].trim()
-
-            if (breakfast !== '') {
-              var food = breakfast.substring(1).trim()
-              var price = getPrice(breakfast.charAt(0), 'breakfast')
-
-              if (price === 'Error') {
-                var token = breakfast.substring(0, 4).trim()
-                var regex = /[0-9]{4,}/
-
-                if (regex.test(token)) {
-                  food = breakfast.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
-                  price = token
+          mealsObjects.forEach(function (mealsObject) {
+            var meals = mealsObject.meals
+            var mealType = mealsObject.type
+            for (var j = 0; j < meals.length; j++) {
+              var meal = meals[j].trim()
+              if (meal !== '') {
+                var food = meal.substring(1).trim()
+                var price = getPrice(meal.charAt(0), mealType)
+                if (price === 'Error') {
+                  var token = meal.match(/\d+/g)[0]
+                  var regex = /[0-9]+/
+                  if (regex.test(token)) {
+                    food = meal.replace(token, '').replace(/ /g, '')
+                    if (!(/\(/.test(food)) && (/\)/.test(food))) {
+                      food.replace(/\)/, '')
+                    }
+                    price = token
+                  }
+                }
+                if (price !== 'Error') {
+                  foods.push({ time: mealType, name: food, price: price })
                 }
               }
-              if (price !== 'Error') {
-                foods.push({ time: 'breakfast', name: food, price: price })
-              }
             }
-          }
-          for (var j = 0; j < lunches.length; j++) {
-            var lunch = lunches[j].trim()
-            if (lunch !== '') {
-              var food = lunch.substring(1).trim()
-              var price = getPrice(lunch.charAt(0), 'lunch')
-
-              if (price === 'Error') {
-                var token = lunch.substring(0, 4).trim()
-                var regex = /[0-9]{4,}/
-
-                if (regex.test(token)) {
-                  food = lunch.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
-                  price = token
-                }
-              }
-              if (price !== 'Error') {
-                foods.push({ time: 'lunch', name: food, price: price })
-              }
-            }
-          }
-          for (var j = 0; j < dinners.length; j++) {
-            var dinner = dinners[j].trim()
-
-            if (dinner !== '') {
-              var food = dinner.substring(1).trim()
-              var price = getPrice(dinner.charAt(0), 'dinner')
-
-              if (price === 'Error') {
-                var token = dinner.substring(0, 4).trim()
-                var regex = /[0-9]{4,}/
-
-                if (regex.test(token)) {
-                  food = dinner.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
-                  price = token
-                }
-              }
-              if (price !== 'Error') {
-                foods.push({ time: 'dinner', name: food, price: price })
-              }
-            }
-          }
+          })
           list.push({ restaurant: name.getName(restaurant), foods: foods })
         }
         resolve(callback(list))
