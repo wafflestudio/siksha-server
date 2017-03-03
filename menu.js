@@ -158,13 +158,13 @@ function crawlSNUCORestaurants (flag, group, callback) {
               var food = breakfast.substring(1).trim()
               var price = getPrice(breakfast.charAt(0), 'breakfast')
 
-              if (price === "Error") {
-                var token = breakfast.substring(0, 4).trim();
-                var regex = /[0-9]{4,}/;
+              if (price === 'Error') {
+                var token = breakfast.substring(0, 4).trim()
+                var regex = /[0-9]{4,}/
 
                 if (regex.test(token)) {
-                  food = breakfast.substring(4).replace(/\ /g, "").replace(/\)/g, "").trim();
-                  price = token;
+                  food = breakfast.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
+                  price = token
                 }
               }
               if (price !== 'Error') {
@@ -178,13 +178,13 @@ function crawlSNUCORestaurants (flag, group, callback) {
               var food = lunch.substring(1).trim()
               var price = getPrice(lunch.charAt(0), 'lunch')
 
-              if (price === "Error") {
-                var token = lunch.substring(0, 4).trim();
-                var regex = /[0-9]{4,}/;
+              if (price === 'Error') {
+                var token = lunch.substring(0, 4).trim()
+                var regex = /[0-9]{4,}/
 
                 if (regex.test(token)) {
-                  food = lunch.substring(4).replace(/\ /g, "").replace(/\)/g, "").trim();
-                  price = token;
+                  food = lunch.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
+                  price = token
                 }
               }
               if (price !== 'Error') {
@@ -199,13 +199,13 @@ function crawlSNUCORestaurants (flag, group, callback) {
               var food = dinner.substring(1).trim()
               var price = getPrice(dinner.charAt(0), 'dinner')
 
-              if (price === "Error") {
-                var token = dinner.substring(0, 4).trim();
-                var regex = /[0-9]{4,}/;
+              if (price === 'Error') {
+                var token = dinner.substring(0, 4).trim()
+                var regex = /[0-9]{4,}/
 
                 if (regex.test(token)) {
-                  food = dinner.substring(4).replace(/\ /g, "").replace(/\)/g, "").trim();
-                  price = token;
+                  food = dinner.substring(4).replace(/\ /g, '').replace(/\)/g, '').trim()
+                  price = token
                 }
               }
               if (price !== 'Error') {
