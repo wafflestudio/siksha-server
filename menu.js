@@ -11,36 +11,36 @@ var logger = require('./logger.js')
 function getPrice (mark, time) {
   switch (mark) {
     case 'ⓐ':
-    if (time === 'breakfast' || time === 'dinner') {
-      return '1000'
-    } else {
-      return '1700'
-    }
+      if (time === 'breakfast' || time === 'dinner') {
+        return '1000'
+      } else {
+        return '1700'
+      }
     case 'ⓑ':
     case 'menu_a':
-    return '2000'
+      return '2000'
     case 'ⓒ':
     case 'menu_b':
-    return '2500'
+      return '2500'
     case 'ⓓ':
     case 'menu_c':
-    return '3000'
+      return '3000'
     case 'ⓔ':
     case 'menu_d':
-    return '3500'
+      return '3500'
     case 'ⓕ':
     case 'menu_e':
-    return '4000'
+      return '4000'
     case 'ⓖ':
-    return '4500'
+      return '4500'
     case 'ⓗ':
-    return '5000'
+      return '5000'
     case 'ⓘ':
-    return '5500'
+      return '5500'
     case 'ⓙ':
-    return '6000'
+      return '6000'
     default:
-    return 'Error'
+      return 'Error'
   }
 }
 
@@ -93,21 +93,17 @@ function crawlGraduateRestaurant (flag, callback) {
       },
       encoding: null
     }
-
     request(options, function (error, response, body) {
       if (!error && response.statusCode === 200) {
         var $ = cheerio.load(iconv.decode(body, 'utf8'))
         var todayIndex = new Date().getDay()
-
         if (todayIndex === 6 && flag === 'tomorrow') {
           var query = $('div.go').find('a[class=right]').attr('href').substring(11).trim()
-
           fetchNextSundayMenu(query, function (data) {
             resolve(callback({ restaurant: '대학원 기숙사 식당', foods: data }))
           })
         } else {
           var foods = []
-
           for (var i = 0; i <= 6; i++) {
             var tr = $('tbody').first().children().get(i)
             var td = $(tr).find('td:not(td[rowspan], td[class=bg])').get(flag === 'tomorrow' ? todayIndex + 1 : todayIndex)
