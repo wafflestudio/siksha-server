@@ -143,29 +143,30 @@ function crawlSNUCORestaurants (flag, group, callback) {
           var foods = []
           var restaurant = restaurants[i]
           var tr = $('table').find('tr:contains(' + restaurant + ')')
-          var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
-          var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
-          var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split('/')
+					var splitRegex = /(?=ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|7000)/g
+          var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
+          var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
+          var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
           var mealsObjects = [{ meals: breakfasts, type: 'breakfast' }, { meals: lunches, type: 'lunch' }, { meals: dinners, type: 'dinner' }]
 
           mealsObjects.forEach(function (mealsObject) {
             var meals = mealsObject.meals
             var mealType = mealsObject.type
             for (var j = 0; j < meals.length; j++) {
-              var meal = meals[j].trim()
+              var meal = meals[j].trim().split(/\/$/)[0]
               if (meal !== '') {
                 var food = meal.substring(1).trim()
                 var price = getPrice(meal.charAt(0), mealType)
                 if (price === 'Error') {
-                  var token = meal.match(/\d+/g)[0]
+                  var token = meal.match(/\d+/g) ? meal.match(/\d+/g)[0] : 'Etc'
                   var regex = /[0-9]{3,}/
                   if (regex.test(token)) {
                     food = meal.replace(token, '').replace(/ /g, '')
                     if (!(/\(/.test(food)) && (/\)/.test(food))) {
                       food.replace(/\)/, '')
                     }
-                    price = token
-                  }
+									}
+                  price = token
                 }
                 if (price !== 'Error') {
                   foods.push({ time: mealType, name: food, price: price })
