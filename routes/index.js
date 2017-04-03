@@ -10,7 +10,7 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' })
 })
 
-router.get('/menu/view', function (req, res, next) {
+router.get('/menus/view', function (req, res, next) {
   menu.crawl(req.query.date, function (result) {
     res.send(result)
   })

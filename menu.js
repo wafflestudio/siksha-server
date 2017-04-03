@@ -100,7 +100,7 @@ function crawlGraduateRestaurant (flag, callback) {
         if (todayIndex === 6 && flag === 'tomorrow') {
           var query = $('div.go').find('a[class=right]').attr('href').substring(11).trim()
           fetchNextSundayMenu(query, function (data) {
-            resolve(callback({ restaurant: '대학원 기숙사 식당', foods: data }))
+            resolve(callback({ restaurant: '대학원 기숙사 식당', menus: data }))
           })
         } else {
           var foods = []
@@ -116,7 +116,7 @@ function crawlGraduateRestaurant (flag, callback) {
             }
           }
 
-          resolve(callback({ restaurant: '대학원 기숙사 식당', foods: foods }))
+          resolve(callback({ restaurant: '대학원 기숙사 식당', menus: foods }))
         }
       }
     })
@@ -174,7 +174,7 @@ function crawlSNUCORestaurants (flag, group, callback) {
               }
             }
           })
-          list.push({ restaurant: name.getName(restaurant), foods: foods })
+          list.push({ restaurant: name.getName(restaurant), menus: foods })
         }
         resolve(callback(list))
       }
@@ -215,7 +215,7 @@ function crawlVetRestaurant (flag, callback) {
           }
         }
 
-        resolve(callback({ restaurant: '85동 수의대 식당', foods: foods }))
+        resolve(callback({ restaurant: '85동 수의대 식당', menus: foods }))
       }
     })
   })
@@ -248,7 +248,7 @@ function combineCrawlingData (flag, callback) {
     data.push(graduate)
     data.push(vet)
 
-    callback({ time: moment(new Date()).format('YYYY-MM-DD HH:mm'), data: data })
+    callback({ data: data })
   })
 }
 
