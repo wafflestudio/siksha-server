@@ -248,7 +248,7 @@ function combineCrawlingData (flag, callback) {
     data.push(graduate)
     data.push(vet)
 
-    callback({ data: data })
+    callback(data)
   })
 }
 
