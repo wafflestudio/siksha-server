@@ -221,8 +221,82 @@ function crawlVetRestaurant (flag, callback) {
   })
 }
 
+function getSodammaruMenus () {
+  var menus = []
+
+  menus.push({ time: 'lunch', name: '도토리묵 비빔밥', price: '7000' })
+  menus.push({ time: 'lunch', name: '해물 순두부찌개', price: '8000' })
+  menus.push({ time: 'lunch', name: '대구 맑은탕', price: '9000' })
+  menus.push({ time: 'lunch', name: '수제 생선까스', price: '9000' })
+  menus.push({ time: 'lunch', name: '정통 생돈까스', price: '10000' })
+  menus.push({ time: 'lunch', name: '특선 회덮밥', price: '13000' })
+  menus.push({ time: 'lunch', name: '숙주 라멘', price: '12000' })
+  menus.push({ time: 'lunch', name: '수제 생선까스 정식', price: '13000' })
+  menus.push({ time: 'lunch', name: '등심돈까스 정식', price: '14000' })
+  menus.push({ time: 'lunch', name: '모듬초밥 정식', price: '15000' })
+  menus.push({ time: 'lunch', name: '사시미 정식', price: '20000' })
+  menus.push({ time: 'lunch', name: '연어구이 정식', price: '20000' })
+  menus.push({ time: 'lunch', name: '모듬사시미', price: '30000' })
+  menus.push({ time: 'lunch', name: '더덕장 야채비빔밥', price: '11000' })
+  menus.push({ time: 'lunch', name: '냉모밀 정식', price: '13000' })
+  menus.push({ time: 'lunch', name: '고추장삼겹살 정식', price: '13000' })
+  menus.push({ time: 'dinner', name: '도토리묵 비빔밥', price: '7000' })
+  menus.push({ time: 'dinner', name: '해물 순두부찌개', price: '8000' })
+  menus.push({ time: 'dinner', name: '대구 맑은탕', price: '9000' })
+  menus.push({ time: 'dinner', name: '수제 생선까스', price: '9000' })
+  menus.push({ time: 'dinner', name: '정통 생돈까스', price: '10000' })
+  menus.push({ time: 'dinner', name: '특선 회덮밥', price: '13000' })
+  menus.push({ time: 'dinner', name: '숙주 라멘', price: '12000' })
+  menus.push({ time: 'dinner', name: '수제 생선까스 정식', price: '13000' })
+  menus.push({ time: 'dinner', name: '등심돈까스 정식', price: '14000' })
+  menus.push({ time: 'dinner', name: '모듬초밥 정식', price: '15000' })
+  menus.push({ time: 'dinner', name: '사시미 정식', price: '20000' })
+  menus.push({ time: 'dinner', name: '연어구이 정식', price: '20000' })
+  menus.push({ time: 'dinner', name: '모듬사시미', price: '30000' })
+  menus.push({ time: 'dinner', name: '더덕장 야채비빔밥', price: '11000' })
+  menus.push({ time: 'dinner', name: '냉모밀 정식', price: '13000' })
+  menus.push({ time: 'dinner', name: '고추장삼겹살 정식', price: '13000' })
+
+  return { restaurant: '소담마루', menus: menus }
+}
+
+function getShabanMenus () {
+  var menus = []
+
+  menus.push({ time: 'breakfast', name: '소불고기 뚝배기', price: '11500' })
+  menus.push({ time: 'breakfast', name: '사골 우거지해장국', price: '10000' })
+  menus.push({ time: 'breakfast', name: '맑은 순두부국', price: '9000' })
+  menus.push({ time: 'breakfast', name: '시원한 황태해장국', price: '8000' })
+  menus.push({ time: 'breakfast', name: '올갱이해장국', price: '8000' })
+  menus.push({ time: 'breakfast', name: '담백한 소고기미역국', price: '7500' })
+  menus.push({ time: 'lunch', name: '버섯불고기전골(4인, 예약제)', price: '60000' })
+  menus.push({ time: 'lunch', name: '짭쪼름 간고등어구이', price: '12000' })
+  menus.push({ time: 'lunch', name: '고추장삼겹살 쌈정식', price: '12000' })
+  menus.push({ time: 'lunch', name: '얼큰 비전지탕(육개장)', price: '11000' })
+  menus.push({ time: 'lunch', name: '매콤제육덮밥', price: '10000' })
+  menus.push({ time: 'lunch', name: '얼큰한 해물순두부국', price: '9500' })
+  menus.push({ time: 'lunch', name: '일본식 왕돈가스', price: '9000' })
+  menus.push({ time: 'lunch', name: '전주식 전통비빔밥', price: '8500' })
+  menus.push({ time: 'lunch', name: '톡톡 김치알밥', price: '8500' })
+  menus.push({ time: 'lunch', name: '시원한 메밀소바', price: '8000' })
+  menus.push({ time: 'dinner', name: '버섯불고기전골(4인, 예약제)', price: '60000' })
+  menus.push({ time: 'dinner', name: '짭쪼름 간고등어구이', price: '12000' })
+  menus.push({ time: 'dinner', name: '고추장삼겹살 쌈정식', price: '12000' })
+  menus.push({ time: 'dinner', name: '얼큰 비전지탕(육개장)', price: '11000' })
+  menus.push({ time: 'dinner', name: '매콤제육덮밥', price: '10000' })
+  menus.push({ time: 'dinner', name: '얼큰한 해물순두부국', price: '9500' })
+  menus.push({ time: 'dinner', name: '일본식 왕돈가스', price: '9000' })
+  menus.push({ time: 'dinner', name: '전주식 전통비빔밥', price: '8500' })
+  menus.push({ time: 'dinner', name: '톡톡 김치알밥', price: '8500' })
+  menus.push({ time: 'dinner', name: '시원한 메밀소바', price: '8000' })
+
+  return { restaurant: '샤반', menus: menus }
+}
+
 function combineCrawlingData (flag, callback) {
   var data = []
+  var sodammaru = getSodammaruMenus()
+  var shaban = getShabanMenus()
   var graduate, vet, directManagements, consignments
 
   Bluebird.all([
@@ -247,6 +321,8 @@ function combineCrawlingData (flag, callback) {
     }
     data.push(graduate)
     data.push(vet)
+    data.push(sodammaru)
+    data.push(shaban)
 
     callback(data)
   })
@@ -293,7 +369,7 @@ module.exports = {
       })
     } else {
       var fileName = query === 'today' ? 'today.json' : 'tomorrow.json'
-      fs.readFile(__dirname + '/public/jsons/' + fileName, { encoding: "utf8" }, function (error, data) {
+      fs.readFile(__dirname + '/public/jsons/' + fileName, { encoding: 'utf8' }, function (error, data) {
         if (!error) {
           callback(data)
         } else {
