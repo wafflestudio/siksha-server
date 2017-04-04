@@ -143,7 +143,7 @@ function crawlSNUCORestaurants (flag, group, callback) {
           var foods = []
           var restaurant = restaurants[i]
           var tr = $('table').find('tr:contains(' + restaurant + ')')
-					var splitRegex = /(?=ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|7000)/g
+          var splitRegex = /(?=ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|7000)/g
           var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
           var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
           var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
@@ -163,9 +163,9 @@ function crawlSNUCORestaurants (flag, group, callback) {
                   if (regex.test(token)) {
                     food = meal.replace(token, '').replace(/ /g, '')
                     if (!(/\(/.test(food)) && (/\)/.test(food))) {
-                      food.replace(/\)/, '')
+                      food.replace(/\)$|\/$/, '')
                     }
-									}
+                  }
                   price = token
                 }
                 if (price !== 'Error') {
