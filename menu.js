@@ -40,6 +40,10 @@ function getPrice (mark, time) {
     case 'ⓙ':
       return '6000'
     default:
+      var arbitraryCostRegex = /<(.*)원>/
+      if (arbitraryCostRegex.test(mark)) {
+        return mark.match(arbitraryCostRegex)[1]
+      }
       return 'Error'
   }
 }
@@ -135,18 +139,40 @@ function crawlSNUCORestaurants (flag, group, callback) {
 
     request(options, function (error, response, body) {
       if (!error && response.statusCode === 200) {
-        var $ = cheerio.load(iconv.decode(body, 'euc-kr'))
+        //console.log('body', iconv.decode(body, 'euc-kr').replace('<br />', 'IT WORKS!!!!'));
+        var decodedBody = iconv.decode(body, 'euc-kr').replace(/<(\d{1},\d{3})원>/g, '@$1원')
+        //var decodedBody = iconv.decode(body, 'euc-kr')
+        console.log(decodedBody.match(/@(.*)원/g))
+
+        //console.log(decodedBody)
+        var $ = cheerio.load(decodedBody)
         var restaurants = name.getRawNames(group)
         var list = []
+
+        var reduce301Menu = (acc, cur) => {
+          if (cur.charAt(0) === '@') {
+            var curs = cur.split('/').map((c) => {
+              if (c) {
+                return c.trim()
+              } else {
+                return null
+              }
+            }).filter(n => n)
+            var price = curs.shift();
+            curs = curs.map((c) => price + c)
+            return acc.concat(curs)
+          }
+          return acc.concat([cur])
+        }
 
         for (var i = 0; i < restaurants.length; i++) {
           var foods = []
           var restaurant = restaurants[i]
           var tr = $('table').find('tr:contains(' + restaurant + ')')
-          var splitRegex = /(?=ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|7000)/g
-          var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
-          var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
-          var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex)
+          var splitRegex = /(?=ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|7000|@)/g
+          var breakfasts = tr.find('td:nth-child(3)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex).reduce(reduce301Menu, [])
+          var lunches = tr.find('td:nth-child(5)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex).reduce(reduce301Menu, [])
+          var dinners = tr.find('td:nth-child(7)').text().trim().replace(/\n/g, '/').replace(/\(\*\)/g, '').split(splitRegex).reduce(reduce301Menu, [])
           var mealsObjects = [{ meals: breakfasts, type: 'breakfast' }, { meals: lunches, type: 'lunch' }, { meals: dinners, type: 'dinner' }]
 
           mealsObjects.forEach(function (mealsObject) {
@@ -155,19 +181,27 @@ function crawlSNUCORestaurants (flag, group, callback) {
             for (var j = 0; j < meals.length; j++) {
               var meal = meals[j].trim().split(/\/$/)[0]
               if (meal !== '') {
-                var food = meal.substring(1).trim()
-                var price = getPrice(meal.charAt(0), mealType)
-                if (price === 'Error') {
-                  var token = meal.match(/\d+/g) ? meal.match(/\d+/g)[0] : 'Etc'
-                  var regex = /[0-9]{3,}/
-                  if (regex.test(token)) {
-                    food = meal.replace(token, '').replace(/ /g, '')
-                    if (!(/\(/.test(food)) && (/\)/.test(food))) {
-                      food.replace(/\)$|\/$/, '')
+                if (meal.charAt(0) === '@') {
+                  food = meal.substring(7).trim()
+                  price = meal.replace(/\D/g,'')
+                  console.log('food', food)
+                  console.log('price', price)
+                } else {
+                  var food = meal.substring(1).trim()
+                  var price = getPrice(meal.charAt(0), mealType)
+                  if (price === 'Error') {
+                    var token = meal.match(/\d+/g) ? meal.match(/\d+/g)[0] : 'Etc'
+                    var regex = /[0-9]{3,}/
+                    if (regex.test(token)) {
+                      food = meal.replace(token, '').replace(/ /g, '')
+                      if (!(/\(/.test(food)) && (/\)/.test(food))) {
+                        food.replace(/\)$|\/$/, '')
+                      }
                     }
+                    price = token
                   }
-                  price = token
                 }
+
                 if (price !== 'Error') {
                   foods.push({ time: mealType, name: food, price: price })
                 }
