@@ -145,17 +145,17 @@ function crawlSNUCORestaurants (flag, group, callback) {
         var restaurants = name.getRawNames(group)
         var list = []
 
-        var reduce301Menu = (acc, cur) => {
+        var reduce301Menu = function (acc, cur) {
           if (cur.charAt(0) === '@') {
-            var curs = cur.split('/').map((c) => {
+            var curs = cur.split('/').map(function (c) {
               if (c) {
                 return c.trim()
               } else {
                 return null
               }
-            }).filter(n => n)
+            }).filter(function (n) { return n })
             var price = curs.shift();
-            curs = curs.map((c) => price + c)
+            curs = curs.map(function (c) { return price + c })
             return acc.concat(curs)
           }
           return acc.concat([cur])
@@ -179,7 +179,7 @@ function crawlSNUCORestaurants (flag, group, callback) {
               if (meal !== '') {
                 if (meal.charAt(0) === '@') {
                   food = meal.substring(7).trim()
-                  price = meal.replace(/\D/g,'')
+                  price = meal.substring(1,7).replace(/,/,'')
                 } else {
                   var food = meal.substring(1).trim()
                   var price = getPrice(meal.charAt(0), mealType)
