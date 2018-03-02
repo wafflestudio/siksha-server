@@ -139,12 +139,8 @@ function crawlSNUCORestaurants (flag, group, callback) {
 
     request(options, function (error, response, body) {
       if (!error && response.statusCode === 200) {
-        //console.log('body', iconv.decode(body, 'euc-kr').replace('<br />', 'IT WORKS!!!!'));
         var decodedBody = iconv.decode(body, 'euc-kr').replace(/<(\d{1},\d{3})원>/g, '@$1원')
-        //var decodedBody = iconv.decode(body, 'euc-kr')
-        console.log(decodedBody.match(/@(.*)원/g))
 
-        //console.log(decodedBody)
         var $ = cheerio.load(decodedBody)
         var restaurants = name.getRawNames(group)
         var list = []
@@ -184,8 +180,6 @@ function crawlSNUCORestaurants (flag, group, callback) {
                 if (meal.charAt(0) === '@') {
                   food = meal.substring(7).trim()
                   price = meal.replace(/\D/g,'')
-                  console.log('food', food)
-                  console.log('price', price)
                 } else {
                   var food = meal.substring(1).trim()
                   var price = getPrice(meal.charAt(0), mealType)
